@@ -1,0 +1,6 @@
+
+This is a proof of concept Wayland WSEGL, which enables the use of SGX
+hardware buffers as pixmaps, effectively making wayland available on SGX
+devices.
+
+Contact me on irc.freenode.net 'Stskeeps' if you have any questions

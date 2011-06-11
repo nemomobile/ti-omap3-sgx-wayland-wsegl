@@ -1,0 +1,487 @@
+
+wsegl.h:
+
+/******************************************************************************
+ Name         : wsegl.h
+ Copyright    :	Copyright (c) Imagination Technologies Limited.
+				This specification is protected by copyright laws and contains
+				material proprietary to Imagination Technologies Limited.
+				You may use and distribute this specification free of charge for implementing
+				the functionality therein, without altering or removing any trademark, copyright,
+				or other notice from the specification.
+ Platform     : ANSI
+*****************************************************************************/
+
+Origin: 
+
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/3rdparty/powervr/wsegl.h
+
+Comment:
+
+Newer version also exists in
+http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/gfxsdk/latest/index_FDS.html
+
+Release notes at http://processors.wiki.ti.com/index.php/RN_4_03_00_02
+
+linux/omapfb.h:
+
+/*
+ * File: include/linux/omapfb.h
+ *
+ * Framebuffer driver for TI OMAP boards
+ *
+ * Copyright (C) 2004 Nokia Corporation
+ * Author: Imre Deak <imre.deak@nokia.com>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
+
+Origin:
+
+From Linux kernel, workaround to not include kernel-adaptation-n900-devel
+directly. Is a kernel header.
+
+Comment:
+
+Similar method as used in xserver-xorg-video-fbdev (SGX variant)
+
+reference/pvr2d.h:
+
+**********************************************************************
+*
+* Copyright(c) Imagination Technologies Ltd.
+*
+* The contents of this file are subject to the MIT license as set out below.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a
+* copy
+* of this software and associated documentation files (the "Software"),
+* to deal in the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense,
+* and/or sell copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following conditions:
+* 
+* The above copyright notice and this permission notice shall be included
+* in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+* MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+* CLAIM,
+* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
+* OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+* 
+* This License is also included in this distribution in the file called 
+* "COPYING".
+* 
+***************************************
+
+Origin:
+
+http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/gfxsdk/latest/index_FDS.html
+
+Release notes at http://processors.wiki.ti.com/index.php/RN_4_03_00_02
+
+Comment:
+
+Exact file not used in code, instead SGX driver's header file is used. Older
+version also exists in Qt tree at 
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/3rdparty/powervr/pvr2d.h
+
+What is used from here especially is the PVR2DMemExport and PVR2DMemMap
+calls, used to share hardware buffers across processes.
+
+
+wayland-drm-client-protocol.h &
+wayland-drm-protocol.c:
+
+ * Copyright © 2010 Kristian Høgsberg
+ *
+ * Permission to use, copy, modify, distribute, and sell this software and
+ * its
+ * documentation for any purpose is hereby granted without fee, provided
+ * that
+ * the above copyright notice appear in all copies and that both that
+ * copyright
+ * notice and this permission notice appear in supporting documentation, and
+ * that the name of the copyright holders not be used in advertising or
+ * publicity pertaining to distribution of the software without specific,
+ * written prior permission.  The copyright holders make no representations
+ * about the suitability of this software for any purpose.  It is provided
+ * "as
+ * is" without express or implied warranty.
+ *
+ * THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+ * SOFTWARE,
+ * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+ * EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+ * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+ * USE,
+ * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+ * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE
+ * OF THIS SOFTWARE.
+
+Origin:
+
+Autogenerated headers from wayland RPC stub generator, using wayland-drm.xml
+from http://cgit.freedesktop.org/mesa/mesa/tree/src/egl/wayland/wayland-drm/protocol/wayland-drm.xml
+
+Comment:
+
+Also exists in qt-compositor.
+
+
+waylandwsegl.c/wayland-egl.c/wayland-egl-priv.h is described per feature added.
+
+waylandwsegl.c/Basic WSEGL skeleton:
+
+Origin:
+
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwswsegl.c
+
+Licensing:
+
+**
+** Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (qt-info@nokia.com)
+**
+** This file is part of the plugins of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** No Commercial Usage
+** This file contains pre-release code and may not be distributed.
+** You may use this file in accordance with the terms and conditions
+** contained in the Technology Preview License Agreement accompanying
+** this package.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights.  These rights are described in the Nokia Qt LGPL Exception   
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at qt-info@nokia.com.
+
+wayland-egl.c/wayland-egl-priv.h -- Basic wayland-egl implementation
+
+Origin:
+
+http://cgit.freedesktop.org/mesa/mesa/tree/src/egl/wayland/wayland-egl/wayland-egl-priv.h
+http://cgit.freedesktop.org/mesa/mesa/tree/src/egl/wayland/wayland-egl/wayland-egl.c
+
+Licensing:
+
+No direct licensing indicated in file headers but
+http://cgit.freedesktop.org/mesa/mesa/plain/docs/license.html states default
+license is:
+
+Copyright (C) 1999-2007  Brian Paul   All Rights Reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+BRIAN PAUL BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+wayland-egl-priv.h, waylandwsegl.c: Declare that NativeDisplay/Pixmap/WindowType is
+wayland objects 
+
+Method:
+
+Seen in mesa include/EGL/eglplatform.h
+
+Licensing: 
+
+** Copyright (c) 2007-2009 The Khronos Group Inc.
+**
+** Permission is hereby granted, free of charge, to any person obtaining a
+** copy of this software and/or associated documentation files (the
+** "Materials"), to deal in the Materials without restriction, including
+** without limitation the rights to use, copy, modify, merge, publish,
+** distribute, sublicense, and/or sell copies of the Materials, and to
+** permit persons to whom the Materials are furnished to do so, subject to
+** the following conditions:
+**
+** The above copyright notice and this permission notice shall be included
+** in all copies or substantial portions of the Materials.
+**
+** THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+** MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+** IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+** CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+
+--
+wayland-egl-priv.h, waylandwsegl.c: Make internal structure for hosting
+wsegl-specific information about wayland display.
+
+Method: 
+
+Reused old wl_egl_display* helper functions from older wayland-egl implementation
+
+Licensing:
+
+See wayland-egl.c/wayland-egl-priv.h -- Basic wayland-egl implementation 
+
+--
+wayland-egl-priv.h, waylandwsegl.c: Each egl display can have different
+attributes such as colorspace etc.
+
+Method: 
+
+Manually initializing using information from pvr2d.h
+
+Licensing:
+
+LGPLv2.1. Author: Carsten Munk <carsten@maemo.org>
+
+
+--
+wayland-egl-priv.h, waylandwsegl.c: Each egl display should have a PVR2D
+context.
+
+Method:
+
+WSEGL Display initialization/destruction seen in
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwswsegl.c
+lines 85-124, 128-132. Context initialization seen in
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwsdrawable.c
+lines 184-213, 362-364
+
+Licensing:
+
+For display initialization/context initalization, see above for Qt
+licensing. For rest, contribution by Carsten Munk <carsten@maemo.org>,
+LGPLv2.1.
+
+----
+
+wayland-egl-priv.h, waylandwsegl.c: If a native display is NULL, it wants
+the framebuffer. Collect information on pixel format and other framebuffer
+properties and store in egl display structure.
+
+Method:
+
+Framebuffer properties collection and mapping to pixel format seen in
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwsdrawable.c
+lines 79-119. WSEGL_PIXELFORMAT conversion is simple conversion based on
+wsegl.h
+
+Licensing:
+
+See Qt licensing. For rest, contribution by Carsten Munk <carsten@maemo.org>,
+LGPL v2.1.
+
+---
+
+Makefile:
+
+Licensing:
+
+LGPL v2.1. Contribution by Carsten Munk <carsten@maemo.org>
+
+---
+
+wayland-egl-priv.h, waylandwsegl.c: Making a window drawable, if native window is NULL, we want the
+framebuffer. Collect information on flipbuffer availiability. Return
+rotation angle and re-use egldisplay as drawable handle.
+
+Method: 
+
+See
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwsdrawable.c
+lines 216-220 for flipbuffer availability code. Return rotation angle,
+drawable seen in
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwswsegl.c
+lines 141, 175-179
+
+Licensing:
+
+See Qt licensing, for rest, contribution by Carsten Munk <carsten@maemo.org>
+
+----
+
+wayland-egl-priv.h, waylandwsegl.c: Drawables need something to draw into.
+To get frames to display, there's two methods, flip chains (note that you
+want a change in frames to happen) or blitting (blit onto a front buffer).
+This sets up back buffering structures and flip chains. 
+
+Method:
+
+See
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwsdrawable.c 
+lines 665-696 for allocation of back buffers and general logic, lines
+241-248 for getting memory handle for framebuffer (front buffer) and lines
+258-273 for flip chain allocation. Stride is 32 in that source code, but as per
+http://processors.wiki.ti.com/index.php/Render_to_Texture_with_OpenGL_ES#Stride
+we can save memory and only have 8 on SGX rev 121. Pixel width in bytes is
+based on RGB565/ARGB8888 definitions.
+
+Licensing:
+
+See Qt licensing, for rest, contribution by Carsten Munk <carsten@maemo.org>
+
+----
+
+wayland-egl-priv.h, waylandwsegl.c: To start rendering the SGX drivers need
+information on buffers and do buffer swapping.
+
+
+Method:
+
+See
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwsdrawable.c
+lines 720-730 for buffer swapping,
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwswsegl.c
+lines 336-379 for information passing.
+
+Licensing:
+
+See Qt licensing
+
+---
+
+wayland-egl-priv.h, waylandwsegl.c: Implement blitting and present flip for
+flipchains.
+
+Method:
+
+See
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwsdrawable.c
+lines 761-762, 790-813, 787 for blitting, present flip and querying blit
+completion,
+
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwswsegl.c
+lines 212-220 for WSEGL part.
+
+Licensing:
+
+See Qt licensing
+
+----
+wayland-egl-priv.h, waylandwsegl.c: Start implementing wayland windows,
+gather information on visuals for buffers and connect to DRM object
+
+Method:
+
+See
+http://cgit.freedesktop.org/mesa/mesa/tree/src/gallium/state_trackers/egl/wayland/native_drm.c
+lines 73-90 for DRM object roundtrip forcing logic, lines 188-248 for DRM
+object connection logic. 
+
+Licensing:
+
+See Mesa licensing, visual comparison is simple wayland method contributed
+by Carsten Munk <carsten@maemo.org>
+
+
+--- 
+waylandwsegl.c: Handle deleting drawables
+
+Method:
+
+See
+https://qt.gitorious.org/qt/qt/blobs/4.7/src/plugins/gfxdrivers/powervr/QWSWSEGL/pvrqwswsegl.c
+lines 705-712
+
+Licensing:
+
+See Qt licensing
+
+---
+waylandwsegl.c: Share hardware buffers with DRM object through a handle.  
+
+Method:
+
+We are using MemExport in xserver-xorg-video-fbdev for SGX, which gives us a
+memory handle which is passed on to DRI clients. pvr2d.h. In this, I use
+PVR2DMemExport to get a shared memory handle for my hardware buffer.
+
+Licensing:
+
+LGPLv2.1, Contribution by Carsten Munk <carsten@maemo.org>. 
+
+--- 
+
+waylandwsegl.c, wayland-egl-priv.h, wayland-egl.c: Make way to differentiate
+between different drawable types
+
+Method:
+
+Just a simple header for the internal structures.
+
+Licensing:
+
+LGPLv2.1, Contribution by Carsten Munk <carsten@maemo.org>
+
+----
+
+waylandwsegl.c: Add swap buffering for wayland windows/DRM buffers
+
+Method:
+
+Basically just logic seen in mesa already, protocol for attaching buffers to
+wayland windows
+
+Seen in http://cgit.freedesktop.org/mesa/mesa/tree/src/gallium/state_trackers/egl/wayland/native_wayland.c
+lines 253-294
+
+Licensing:
+
+See Mesa licensing.
+
+---
+
+waylandwsegl.c: If we get a specially crafted pixmap (pixmap drawables) that contains a DRM
+handle, we map it into space and use it as a pixmap.
+
+Method:
+
+The inverse of a PVR2DMemExport is logically a PVR2DMemMap (and takes a
+PVR2D_HANDLE too). We make a fake pixmap structure for internal usage and
+map in the buffer into our memory space/SGX contexts. When render
+information is requested, we can pass the memory information to the SGX
+drivers.
+
+Licensing:
+
+LGPLv2.1, Contribution by Carsten Munk <carsten@maemo.org>

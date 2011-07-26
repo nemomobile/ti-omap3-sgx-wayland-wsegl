@@ -435,7 +435,7 @@ static WSEGLError wseglCreateWindowDrawable
     else
     {
        nativeWindow->display = egldisplay;
-       if (nativeWindow->visual == wl_display_get_rgb_visual(nativeWindow->display->display))
+/*       if (nativeWindow->visual == wl_display_get_rgb_visual(nativeWindow->display->display))
        {
            nativeWindow->format = WSEGL_PIXELFORMAT_565;
        }  
@@ -444,11 +444,11 @@ static WSEGLError wseglCreateWindowDrawable
            nativeWindow->format = WSEGL_PIXELFORMAT_8888;
        }
        else if (nativeWindow->visual == wl_display_get_premultiplied_argb_visual(nativeWindow->display->display))
-       {
-           nativeWindow->format = WSEGL_PIXELFORMAT_8888;
+       { */
+           nativeWindow->format = WSEGL_PIXELFORMAT_8888; /*
        }
        else
-         assert(0);
+         assert(0); */
     }
 
     /* We can't do empty buffers, so let's make a 8x8 one. */
@@ -488,7 +488,7 @@ static WSEGLError wseglCreateWindowDrawable
        }
     }      
   
-    *drawable = (WSEGLDrawableHandle) egldisplay; /* Reuse the egldisplay */
+    *drawable = (WSEGLDrawableHandle) nativeWindow; /* Reuse the egldisplay */
     *rotationAngle = WSEGL_ROTATE_0;
     return WSEGL_SUCCESS;
 }
@@ -522,12 +522,15 @@ static WSEGLError wseglCreatePixmapDrawable
 /* Delete a specific drawable */
 static WSEGLError wseglDeleteDrawable(WSEGLDrawableHandle _drawable)
 {
-   /* XXX support pixmap */
-   struct wl_egl_window *drawable = (struct wl_egl_window *) _drawable;
+   return WSEGL_SUCCESS;
+/*   struct wl_egl_window *drawable = (struct wl_egl_window *) _drawable;
 
    int index;
    int numBuffers = WAYLANDWSEGL_MAX_BACK_BUFFERS;
-   assert(drawable->header.type == WWSEGL_DRAWABLE_TYPE_WINDOW);
+   if (drawable->header.type != WWSEGL_DRAWABLE_TYPE_WINDOW)
+   {
+      return WSEGL_SUCCESS;
+   }
    for (index = 0; index < numBuffers; ++index) {
          if (drawable->backBuffers[index])
             PVR2DMemFree(drawable->display->context, drawable->backBuffers[index]);
@@ -536,7 +539,7 @@ static WSEGLError wseglDeleteDrawable(WSEGLDrawableHandle _drawable)
   
    drawable->backBuffersValid = 0;
 
-   return WSEGL_SUCCESS;
+   return WSEGL_SUCCESS; */
 }
 
 static void

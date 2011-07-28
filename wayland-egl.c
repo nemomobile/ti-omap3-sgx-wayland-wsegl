@@ -47,11 +47,6 @@ wl_egl_window_resize(struct wl_egl_window *egl_window,
 		     int width, int height,
 		     int dx, int dy)
 {
-        if (width == 0 && height == 0)
-        {
-           width=400;
-           height=400;
-        }
 	egl_window->width  = width;
 	egl_window->height = height;
 	egl_window->dx     = dx;
@@ -68,7 +63,7 @@ wl_egl_window_create(struct wl_surface *surface,
  
 	egl_window = malloc(sizeof *egl_window);
 	if (!egl_window)
-	return NULL;
+    	return NULL;
 
         egl_window->header.type = WWSEGL_DRAWABLE_TYPE_WINDOW;
 	egl_window->surface = surface;
@@ -107,11 +102,11 @@ wl_egl_pixmap_create(int width, int height,
 		     struct wl_visual *visual, uint32_t flags)
 {
 	struct wl_egl_pixmap *egl_pixmap;
-
+	
 	egl_pixmap = malloc(sizeof *egl_pixmap);
 	if (egl_pixmap == NULL)
 		return NULL;
-        
+                
         egl_pixmap->header.type  = WWSEGL_DRAWABLE_TYPE_PIXMAP;
 	egl_pixmap->display = NULL;
 	egl_pixmap->width   = width;

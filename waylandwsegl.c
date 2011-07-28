@@ -435,20 +435,7 @@ static WSEGLError wseglCreateWindowDrawable
     else
     {
        nativeWindow->display = egldisplay;
-/*       if (nativeWindow->visual == wl_display_get_rgb_visual(nativeWindow->display->display))
-       {
-           nativeWindow->format = WSEGL_PIXELFORMAT_565;
-       }  
-       else if (nativeWindow->visual == wl_display_get_argb_visual(nativeWindow->display->display))
-       {
            nativeWindow->format = WSEGL_PIXELFORMAT_8888;
-       }
-       else if (nativeWindow->visual == wl_display_get_premultiplied_argb_visual(nativeWindow->display->display))
-       { */
-           nativeWindow->format = WSEGL_PIXELFORMAT_8888; /*
-       }
-       else
-         assert(0); */
     }
 
     /* We can't do empty buffers, so let's make a 8x8 one. */
@@ -506,7 +493,7 @@ static WSEGLError wseglCreatePixmapDrawable
     {
         struct wl_egl_drmbuffer *drmbuffer = (struct wl_egl_drmbuffer *)nativePixmap;
         struct wl_egl_pixmap *pixmap = wl_egl_pixmap_create(drmbuffer->width, drmbuffer->height, drmbuffer->visual, 0);
-
+        pixmap->display = egldisplay;
         pixmap->stride = drmbuffer->stride;
         pixmap->name = drmbuffer->name;
         pixmap->format = WSEGL_PIXELFORMAT_8888;
@@ -522,24 +509,33 @@ static WSEGLError wseglCreatePixmapDrawable
 /* Delete a specific drawable */
 static WSEGLError wseglDeleteDrawable(WSEGLDrawableHandle _drawable)
 {
-   return WSEGL_SUCCESS;
-/*   struct wl_egl_window *drawable = (struct wl_egl_window *) _drawable;
+   struct wl_egl_window *drawable = (struct wl_egl_window *) _drawable;
 
    int index;
    int numBuffers = WAYLANDWSEGL_MAX_BACK_BUFFERS;
-   if (drawable->header.type != WWSEGL_DRAWABLE_TYPE_WINDOW)
+
+   if (drawable->header.type == WWSEGL_DRAWABLE_TYPE_WINDOW)
    {
-      return WSEGL_SUCCESS;
-   }
-   for (index = 0; index < numBuffers; ++index) {
+       
+      for (index = 0; index < numBuffers; ++index) {
+         if (drawable->drmbuffers[index])
+            wl_buffer_destroy(drawable->drmbuffers[index]);
          if (drawable->backBuffers[index])
             PVR2DMemFree(drawable->display->context, drawable->backBuffers[index]);
-   }
-   memset(drawable->backBuffers, 0, sizeof(drawable->backBuffers));
+            
+    }
+    memset(drawable->backBuffers, 0, sizeof(drawable->backBuffers));
   
-   drawable->backBuffersValid = 0;
+    drawable->backBuffersValid = 0;
 
-   return WSEGL_SUCCESS; */
+    return WSEGL_SUCCESS;
+   }
+   else if (drawable->header.type == WWSEGL_DRAWABLE_TYPE_PIXMAP)
+   {
+      struct wl_egl_pixmap *pixmap = (struct wl_egl_pixmap *)drawable;
+      PVR2DMemFree(pixmap->display->context, pixmap->pvrmem);
+   }
+   else assert(0);
 }
 
 static void

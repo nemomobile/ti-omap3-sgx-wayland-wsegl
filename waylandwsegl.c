@@ -44,6 +44,7 @@
 #include <wayland-client.h>
 #include <wayland-server.h>
 #include <wayland-egl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
@@ -53,6 +54,7 @@
 #include <sys/mman.h>
 #include <linux/fb.h>
 #include <sys/time.h>
+#include <sys/ioctl.h>
 #include <time.h>
 
 static WSEGLCaps const wseglDisplayCaps[] = {
@@ -208,6 +210,7 @@ static WSEGLPixelFormat getwseglPixelFormat(struct wl_egl_display *egldisplay)
        }
        else
         assert(0);  
+    return WSEGL_SUCCESS;
 }
 
 
@@ -227,26 +230,6 @@ static const struct wl_drm_listener drm_listener = {
  drm_handle_device,
  drm_handle_authenticated
 };
-
-static void
-sync_callback(void *data)
-{
-   int *done = data;
-   
-   *done = 1;
-}
-      
-static void
-force_roundtrip(struct wl_display *display)
-{
-  int done = 0;
-       
-  wl_display_sync_callback(display, sync_callback, &done);
-  wl_display_iterate(display, WL_DISPLAY_WRITABLE);
-  while (!done)
-     wl_display_iterate(display, WL_DISPLAY_READABLE);
- }
-
 
 /* Initialize a native display for use with WSEGL */
 static WSEGLError wseglInitializeDisplay
@@ -293,26 +276,24 @@ static WSEGLError wseglInitializeDisplay
 
        egldisplay->wseglDisplayConfigs[0].ePixelFormat = format;
        egldisplay->wseglDisplayConfigs[1].ePixelFormat = format;
-       
-    }  
+    }
     else
     {
       uint32_t id;
       id = wl_display_get_global(egldisplay->display, "wl_drm", 1);
       if (id == 0)
-        force_roundtrip(egldisplay->display);
+        wl_display_roundtrip(egldisplay->display);
       id = wl_display_get_global(egldisplay->display, "wl_drm", 1);
       if (id == 0)
         return WSEGL_CANNOT_INITIALISE; 
 
-      
-      egldisplay->drm = wl_drm_create(egldisplay->display, id, 1);    
+      egldisplay->drm = wl_display_bind(egldisplay->display, id, &wl_drm_interface);
       if (!egldisplay->drm)
          return WSEGL_CANNOT_INITIALISE;
       wl_drm_add_listener(egldisplay->drm, &drm_listener, egldisplay);
-      force_roundtrip(egldisplay->display);
+      wl_display_roundtrip(egldisplay->display);
 
-    }    
+    }
 
     *display = (WSEGLDisplayHandle)egldisplay;
     *caps = wseglDisplayCaps;
@@ -414,15 +395,15 @@ static WSEGLError wseglCreateWindowDrawable
        PVR2DDISPLAYINFO displayInfo;
 
        assert(egldisplay->display == NULL);
-      
+
        /* Let's create a fake wl_egl_window to simplify code */
-       
-       nativeWindow = wl_egl_window_create(NULL, egldisplay->var.xres, egldisplay->var.yres, NULL);
+
+       nativeWindow = wl_egl_window_create(NULL, egldisplay->var.xres, egldisplay->var.yres);
        nativeWindow->format = getwseglPixelFormat(egldisplay);
        nativeWindow->display = egldisplay;
-       
+
        assert(PVR2DGetDeviceInfo(egldisplay->context, &displayInfo) == PVR2D_OK);
-       
+
        if (displayInfo.ulMaxFlipChains > 0 && displayInfo.ulMaxBuffersInChain > 0)
               nativeWindow->numFlipBuffers = displayInfo.ulMaxBuffersInChain;
        if (nativeWindow->numFlipBuffers > WAYLANDWSEGL_MAX_FLIP_BUFFERS)
@@ -450,7 +431,7 @@ static WSEGLError wseglCreateWindowDrawable
     {
        nativeWindow->stridePixels = (nativeWindow->width + 7) & ~7; 
        nativeWindow->strideBytes = nativeWindow->stridePixels * wseglPixelFormatBytesPP(nativeWindow->format);
-       
+
        if (allocateBackBuffers(egldisplay, nativeWindow) == WSEGL_OUT_OF_MEMORY)
           return WSEGL_OUT_OF_MEMORY;
 
@@ -460,11 +441,11 @@ static WSEGLError wseglCreateWindowDrawable
             for (index = 0; index < WAYLANDWSEGL_MAX_BACK_BUFFERS; index++)
             {
               PVR2D_HANDLE name;
-             
+
               assert(PVR2DMemExport(egldisplay->context, 0, nativeWindow->backBuffers[index], &name) == PVR2D_OK);                 
 
               nativeWindow->drmbuffers[index] = wl_drm_create_buffer(egldisplay->drm, (uint32_t)name, 
-                 nativeWindow->width, nativeWindow->height, nativeWindow->strideBytes, nativeWindow->visual);
+                 nativeWindow->width, nativeWindow->height, nativeWindow->strideBytes, nativeWindow->format);
               assert(nativeWindow->drmbuffers[index] != NULL);
             }
        }
@@ -492,7 +473,7 @@ static WSEGLError wseglCreatePixmapDrawable
     if (drawable_header->type == WWSEGL_DRAWABLE_TYPE_DRMBUFFER)
     {
         struct wl_egl_drmbuffer *drmbuffer = (struct wl_egl_drmbuffer *)nativePixmap;
-        struct wl_egl_pixmap *pixmap = wl_egl_pixmap_create(drmbuffer->width, drmbuffer->height, drmbuffer->visual, 0);
+        struct wl_egl_pixmap *pixmap = wl_egl_pixmap_create(drmbuffer->width, drmbuffer->height, 0);
         pixmap->display = egldisplay;
         pixmap->stride = drmbuffer->stride;
         pixmap->name = drmbuffer->name;
@@ -536,22 +517,28 @@ static WSEGLError wseglDeleteDrawable(WSEGLDrawableHandle _drawable)
       PVR2DMemFree(pixmap->display->context, pixmap->pvrmem);
    }
    else assert(0);
+   return WSEGL_SUCCESS;
 }
 
 static void
-wayland_frame_callback(struct wl_surface *surface, void *data, uint32_t time)
+sync_callback(void *data, struct wl_callback *callback, uint32_t time)
 {
-   struct wl_egl_window *window = data;
-   
-   window->block_swap_buffers = 0; /* false */
+    struct wl_egl_window *window = data;
+
+    window->block_swap_buffers = 0; /* false */
+    wl_callback_destroy(callback);
 }
-                                                     
+
+static const struct wl_callback_listener sync_listener = {
+     sync_callback
+};
 
 /* Swap the contents of a drawable to the screen */
 static WSEGLError wseglSwapDrawable
     (WSEGLDrawableHandle _drawable, unsigned long data)
 {
     struct wl_egl_window *drawable = (struct wl_egl_window *) _drawable;
+    struct wl_callback *callback;
 
     if (drawable->numFlipBuffers)
     {
@@ -561,11 +548,11 @@ static WSEGLError wseglSwapDrawable
     { 
         while (drawable->block_swap_buffers == 1)
           wl_display_iterate(drawable->display->display,
-          WL_DISPLAY_READABLE);    
+          WL_DISPLAY_READABLE);
         drawable->block_swap_buffers = 1;
-        wl_display_frame_callback(drawable->display->display,
-          drawable->surface, wayland_frame_callback, drawable);
-          
+        callback = wl_display_sync(drawable->display->display);
+        wl_callback_add_listener(callback, &sync_listener, drawable);
+
         wl_buffer_damage(drawable->drmbuffers[drawable->currentBackBuffer], 0, 0,
          drawable->width, drawable->height);
         wl_surface_attach(drawable->surface,
@@ -612,18 +599,21 @@ static WSEGLError wseglSwapDrawable
 static WSEGLError wseglSwapControlInterval
     (WSEGLDrawableHandle drawable, unsigned long interval)
 {
+    return WSEGL_SUCCESS;
 }
 
  /* Flush native rendering requests on a drawable */
 static WSEGLError wseglWaitNative
     (WSEGLDrawableHandle drawable, unsigned long engine)
 {
+    return WSEGL_SUCCESS;
 }
 
 /* Copy color data from a drawable to a native pixmap */
 static WSEGLError wseglCopyFromDrawable
     (WSEGLDrawableHandle _drawable, NativePixmapType nativePixmap)
 {
+    return WSEGL_SUCCESS;
 }
 
 /* Copy color data from a PBuffer to a native pixmap */
@@ -632,6 +622,7 @@ static WSEGLError wseglCopyFromPBuffer
      unsigned long stride, WSEGLPixelFormat format,
      NativePixmapType nativePixmap)
 {
+    return WSEGL_SUCCESS;
 }
 
 static int wseglGetBuffers(struct wl_egl_window *drawable, PVR2DMEMINFO **source, PVR2DMEMINFO **render)

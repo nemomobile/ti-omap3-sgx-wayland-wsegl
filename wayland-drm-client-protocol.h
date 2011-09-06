@@ -57,15 +57,6 @@ wl_drm_add_listener(struct wl_drm *wl_drm,
 #define WL_DRM_AUTHENTICATE	0
 #define WL_DRM_CREATE_BUFFER	1
 
-static inline struct wl_drm *
-wl_drm_create(struct wl_display *display, uint32_t id, uint32_t version)
-{
-	wl_display_bind(display, id, "wl_drm", version);
-
-	return (struct wl_drm *)
-		wl_proxy_create_for_id(display, &wl_drm_interface, id);
-}
-
 static inline void
 wl_drm_set_user_data(struct wl_drm *wl_drm, void *user_data)
 {
@@ -92,7 +83,7 @@ wl_drm_authenticate(struct wl_drm *wl_drm, uint32_t id)
 }
 
 static inline struct wl_buffer *
-wl_drm_create_buffer(struct wl_drm *wl_drm, uint32_t name, int width, int height, uint32_t stride, struct wl_visual *visual)
+wl_drm_create_buffer(struct wl_drm *wl_drm, uint32_t name, int width, int height, uint32_t stride, uint32_t format)
 {
 	struct wl_proxy *id;
 
@@ -102,7 +93,7 @@ wl_drm_create_buffer(struct wl_drm *wl_drm, uint32_t name, int width, int height
 		return NULL;
 
 	wl_proxy_marshal((struct wl_proxy *) wl_drm,
-			 WL_DRM_CREATE_BUFFER, id, name, width, height, stride, visual);
+			 WL_DRM_CREATE_BUFFER, id, name, width, height, stride, format);
 
 	return (struct wl_buffer *) id;
 }

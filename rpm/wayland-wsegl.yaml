@@ -12,10 +12,9 @@ Description: |
 PkgBR:
     - ti-omap3-sgx-devel
 PkgConfigBR:
+    - libffi
     - wayland-client
     - wayland-server
-BuildRequires:
-    - libffi-devel
 Builder: make
 SubPackages:
     - Name: eglext
@@ -23,7 +22,8 @@ SubPackages:
       Group: Development/Libraries
       Description: devel files for wayland
     - Name: eglext-devel
-      Requires: wayland-wsegl-eglext
+      Requires:
+          - wayland-wsegl-eglext
       Summary: wayland devel library
       Group: Development/Libraries
       Description: devel files for wayland

@@ -547,8 +547,7 @@ static WSEGLError wseglSwapDrawable
     else if (drawable->display->display)
     { 
         while (drawable->block_swap_buffers == 1)
-          wl_display_iterate(drawable->display->display,
-          WL_DISPLAY_READABLE);
+          wl_display_iterate(drawable->display->display);
         drawable->block_swap_buffers = 1;
         callback = wl_display_sync(drawable->display->display);
         wl_callback_add_listener(callback, &sync_listener, drawable);

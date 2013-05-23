@@ -1,0 +1,29 @@
+Name: wayland-wsegl
+Summary: WSEGL for Wayland
+Version: 0.1
+Release: 1
+Group: Applications/Engineering
+License: Undecided
+URL: http://foobar.com
+Sources:
+    - "%{name}-%{version}.tar.gz"
+Description: |
+    - Something
+PkgBR:
+    - ti-omap3-sgx-devel
+PkgConfigBR:
+    - wayland-client
+    - wayland-server
+BuildRequires:
+    - libffi-devel
+Builder: make
+SubPackages:
+    - Name: eglext
+      Summary: wayland devel library
+      Group: Development/Libraries
+      Description: devel files for wayland
+    - Name: eglext-devel
+      Requires: wayland-wsegl-eglext
+      Summary: wayland devel library
+      Group: Development/Libraries
+      Description: devel files for wayland

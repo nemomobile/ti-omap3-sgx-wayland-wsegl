@@ -35,6 +35,8 @@ static const struct wl_message wl_drm_events[] = {
 	{ "authenticated", "", NULL },
 };
 
+#define ARRAY_LENGTH(a) (sizeof (a) / sizeof (a)[0])
+
 WL_EXPORT const struct wl_interface wl_drm_interface = {
 	"wl_drm", 1,
 	ARRAY_LENGTH(wl_drm_requests), wl_drm_requests,

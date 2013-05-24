@@ -56,6 +56,7 @@
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include <time.h>
+#include "linux/omapfb.h"
 
 static WSEGLCaps const wseglDisplayCaps[] = {
     {WSEGL_CAP_WINDOWS_USE_HW_SYNC, 1},
@@ -74,6 +75,9 @@ wl_egl_display_create(struct wl_display *display)
 		return NULL;
 	egl_display->display = display;
 
+	egl_display->fd = -1;
+	egl_display->device_name = NULL;
+	egl_display->authenticated = false;
 	egl_display->context_refcnt = 0;
 	egl_display->context = 0;
 
@@ -111,6 +115,8 @@ wl_egl_display_create(struct wl_display *display)
 WL_EGL_EXPORT void
 wl_egl_display_destroy(struct wl_egl_display *egl_display)
 {
+	free(egl_display->device_name);
+	close(egl_display->fd);
 
 	free(egl_display);
 }
@@ -272,6 +278,7 @@ static WSEGLError wseglInitializeDisplay
           close(fd);
           return WSEGL_CANNOT_INITIALISE; 
        }
+       egldisplay->fd = fd;
        format = getwseglPixelFormat(egldisplay);
 
        egldisplay->wseglDisplayConfigs[0].ePixelFormat = format;
@@ -416,7 +423,20 @@ static WSEGLError wseglCreateWindowDrawable
     else
     {
        nativeWindow->display = egldisplay;
+       if (nativeWindow->visual == wl_display_get_rgb_visual(nativeWindow->display->display))
+       {
+           nativeWindow->format = WSEGL_PIXELFORMAT_565;
+       }  
+       else if (nativeWindow->visual == wl_display_get_argb_visual(nativeWindow->display->display))
+       {
            nativeWindow->format = WSEGL_PIXELFORMAT_8888;
+       }
+       else if (nativeWindow->visual == wl_display_get_premultiplied_argb_visual(nativeWindow->display->display))
+       {
+           nativeWindow->format = WSEGL_PIXELFORMAT_8888;
+       }
+       else
+         assert(0);
     }
 
     /* We can't do empty buffers, so let's make a 8x8 one. */
@@ -452,7 +472,9 @@ static WSEGLError wseglCreateWindowDrawable
        /* Framebuffer */
        else
        {
+           /* XXX should assert something about stride etc.. */
            assert(PVR2DGetFrameBuffer(egldisplay->context, PVR2D_FB_PRIMARY_SURFACE, &nativeWindow->frontBufferPVRMEM) == PVR2D_OK);
+           // nativeWindow->frontBuffer = (void *) nativeWindow->frontBufferPVRMEM->pBase;
        }
     }      
   
@@ -542,6 +564,7 @@ static WSEGLError wseglSwapDrawable
 
     if (drawable->numFlipBuffers)
     {
++//        printf("PRESENT FLIP\n");
         PVR2DPresentFlip(drawable->display->context, drawable->flipChain, drawable->backBuffers[drawable->currentBackBuffer], 0);
     }
     else if (drawable->display->display)
@@ -586,6 +609,18 @@ static WSEGLError wseglSwapDrawable
        PVR2DBlt(drawable->display->context, &blit); 
        PVR2DQueryBlitsComplete
           (drawable->display->context, drawable->frontBufferPVRMEM, 1);                      
+       assert (drawable->display->fd >= 0);
+
+
+       struct omapfb_update_window update_window;
+         
+       update_window.x = update_window.out_x = 0;
+       update_window.y = update_window.out_y = 0;
+       update_window.width = update_window.out_width = drawable->width;
+       update_window.height = update_window.out_height = drawable->height;
+       update_window.format = 0;
+       
+       assert(ioctl(drawable->display->fd, OMAPFB_UPDATE_WINDOW, &update_window) == 0);       
     }
     
     drawable->currentBackBuffer   

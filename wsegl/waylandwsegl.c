@@ -219,6 +219,48 @@ static WSEGLPixelFormat getwseglPixelFormat(struct wl_egl_display *egldisplay)
     return WSEGL_SUCCESS;
 }
 
+static void registry_handle_global(void *data, struct wl_registry *registry, uint32_t name,
+    const char *interface, uint32_t version)
+{
+    struct wl_egl_display *egldisplay = (struct wl_egl_display *)data;
+
+    if (strcmp(interface, "sgx_wlegl") == 0) {
+        egldisplay->sgx_wlegl = (struct sgx_wlegl *)wl_registry_bind(registry, name, &sgx_wlegl_interface, 1);
+    }
+}
+
+static const struct wl_registry_listener registry_listener = {
+    registry_handle_global
+};
+
+static void roundtrip_callback(void *data, struct wl_callback *callback, uint32_t serial)
+{
+   int *done = (int *)data;
+
+   *done = 1;
+   wl_callback_destroy(callback);
+}
+
+static const struct wl_callback_listener roundtrip_listener = {
+   roundtrip_callback
+};
+
+int wayland_roundtrip(struct wl_egl_display *display)
+{
+    struct wl_callback *callback;
+    int done = 0, ret = 0;
+    wl_display_dispatch_queue_pending(display->display, display->queue);
+
+    callback = wl_display_sync(display->display);
+    wl_callback_add_listener(callback, &roundtrip_listener, &done);
+    wl_proxy_set_queue((struct wl_proxy *)callback, display->queue);
+    while (ret == 0 && !done)
+        ret = wl_display_dispatch_queue(display->display, display->queue);
+
+    return ret;
+}
+
+
 /* Initialize a native display for use with WSEGL */
 static WSEGLError wseglInitializeDisplay
     (NativeDisplayType nativeDisplay, WSEGLDisplayHandle *display,
@@ -268,7 +310,14 @@ static WSEGLError wseglInitializeDisplay
     }
     else
     {
-        printf("wseglInitializeDisplay: STUB (wayland)\n");
+        egldisplay->queue = wl_display_create_queue(nativeDisplay);
+        egldisplay->frame_callback = NULL;
+        egldisplay->registry = wl_display_get_registry(nativeDisplay);
+        wl_proxy_set_queue(egldisplay->registry, egldisplay->queue);
+        wl_registry_add_listener(egldisplay->registry, &registry_listener, egldisplay);
+
+        assert(wayland_roundtrip(egldisplay) >= 0);
+        assert(egldisplay->sgx_wlegl);
     }
 
     *display = (WSEGLDisplayHandle)egldisplay;
@@ -617,7 +666,15 @@ static int wseglGetBuffers(struct wl_egl_window *drawable, PVR2DMEMINFO **source
 static WSEGLError wseglGetDrawableParameters
     (WSEGLDrawableHandle _drawable, WSEGLDrawableParams *sourceParams,
      WSEGLDrawableParams *renderParams)
-{
+     {
+/*
+ * [22:26:17] <Stskeeps> note: you'll need this in future:
+ * [22:26:19] <Stskeeps> if static WSEGLError wseglGetDrawableParameters
+ * [22:26:19] <Stskeeps> 651
+ * [22:26:33] <Stskeeps> returns return WSEGL_BAD_DRAWABLE;
+ * [22:26:38] <Stskeeps> it'll re-create the drawable
+ * [22:26:50] <Stskeeps> do this when window format,  height,  width has changed
+ */
     struct wl_egl_window *eglwindow = (struct wl_egl_window *) _drawable;
     PVR2DMEMINFO *source, *render;
 

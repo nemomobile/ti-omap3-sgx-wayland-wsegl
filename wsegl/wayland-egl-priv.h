@@ -51,6 +51,7 @@ typedef struct wl_display* NativeDisplayType;
 typedef struct wl_egl_pixmap* NativePixmapType;
 typedef struct wl_egl_window* NativeWindowType;
 
+#include "wayland-sgx-server-protocol.h"
 #include "wsegl.h"
 
 #define WAYLANDWSEGL_MAX_BACK_BUFFERS     2
@@ -78,7 +79,11 @@ struct wl_egl_display {
 	PVR2DCONTEXTHANDLE context;
 	WSEGLConfig wseglDisplayConfigs[3];
 	struct fb_var_screeninfo var;
-	struct fb_fix_screeninfo fix;
+    struct fb_fix_screeninfo fix;
+    struct wl_queue *queue;
+    struct wl_callback *frame_callback;
+    struct wl_registry *registry;
+    struct sgx_wlegl *sgx_wlegl;
 };
 
 struct wl_egl_window {

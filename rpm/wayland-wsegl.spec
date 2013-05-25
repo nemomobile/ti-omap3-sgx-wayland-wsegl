@@ -60,5 +60,9 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %{_libdir}/waylandwsegl.so
+%{_libdir}/libEGL-proxy.so
+%{_libdir}/libEGL-proxy.so.1
+%{_libdir}/libEGL-proxy.so.1.0
+%{_libdir}/libEGL-proxy.so.1.0.0
 # >> files
 # << files

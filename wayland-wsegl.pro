@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = wsegl
+SUBDIRS = wsegl libegl

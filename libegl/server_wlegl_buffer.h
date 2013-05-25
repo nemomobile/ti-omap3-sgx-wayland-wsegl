@@ -1,0 +1,70 @@
+/*
+ * Copyright © 2012 Collabora, Ltd.
+ *
+ * Permission to use, copy, modify, distribute, and sell this software and
+ * its documentation for any purpose is hereby granted without fee, provided
+ * that the above copyright notice appear in all copies and that both that
+ * copyright notice and this permission notice appear in supporting
+ * documentation, and that the name of the copyright holders not be used in
+ * advertising or publicity pertaining to distribution of the software
+ * without specific, written prior permission.  The copyright holders make
+ * no representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ *
+ * THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+ * SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
+ * RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
+ * CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+ * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#ifndef SERVER_WLEGL_BUFFER_H
+#define SERVER_WLEGL_BUFFER_H
+
+#include <wayland-server.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+struct server_wlegl;
+struct server_wlegl_buffer;
+
+struct remote_window_buffer
+{
+    unsigned int width;
+    unsigned int height;
+    unsigned int stride;
+    unsigned int format;
+    int32_t handle;
+};
+
+struct remote_window_buffer *remote_window_buffer_create(unsigned int width,
+            unsigned int height,
+            unsigned int stride,
+            unsigned int format,
+            int32_t handle);
+
+struct server_wlegl_buffer {
+	struct wl_buffer base;
+	struct server_wlegl *wlegl;
+
+	struct remote_window_buffer *buf;
+};
+
+struct server_wlegl_buffer *
+server_wlegl_buffer_create(uint32_t id, int32_t width, int32_t height,
+			   int32_t stride, int32_t format,
+			   int32_t handle, struct server_wlegl *wlegl);
+
+struct server_wlegl_buffer *
+server_wlegl_buffer_from(struct wl_buffer *);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* SERVER_WLEGL_BUFFER_H */

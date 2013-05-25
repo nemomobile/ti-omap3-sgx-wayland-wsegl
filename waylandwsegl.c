@@ -552,7 +552,7 @@ static WSEGLError wseglSwapDrawable
 
     if (drawable->numFlipBuffers)
     {
-+//        printf("PRESENT FLIP\n");
+//        printf("PRESENT FLIP\n");
         PVR2DPresentFlip(drawable->display->context, drawable->flipChain, drawable->backBuffers[drawable->currentBackBuffer], 0);
     }
     else if (drawable->display->display)
@@ -607,8 +607,11 @@ static WSEGLError wseglSwapDrawable
        update_window.width = update_window.out_width = drawable->width;
        update_window.height = update_window.out_height = drawable->height;
        update_window.format = 0;
-       
-       assert(ioctl(drawable->display->fd, OMAPFB_UPDATE_WINDOW, &update_window) == 0);       
+
+       // TODO: why is qmlscene as wayland client hitting this codepath
+//       assert(
+           ioctl(drawable->display->fd, OMAPFB_UPDATE_WINDOW, &update_window);
+//           == 0);       
     }
     
     drawable->currentBackBuffer   

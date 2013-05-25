@@ -15,15 +15,7 @@ PkgConfigBR:
     - libffi
     - wayland-client
     - wayland-server
-Builder: make
-SubPackages:
-    - Name: eglext
-      Summary: wayland devel library
-      Group: Development/Libraries
-      Description: devel files for wayland
-    - Name: eglext-devel
-      Requires:
-          - wayland-wsegl-eglext
-      Summary: wayland devel library
-      Group: Development/Libraries
-      Description: devel files for wayland
+Builder: qmake
+Files:
+    - "%{_libdir}/waylandwsegl.so"
+

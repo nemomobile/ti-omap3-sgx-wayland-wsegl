@@ -27,23 +27,6 @@ BuildRequires:  ti-omap3-sgx-devel
 - Something
 
 
-%package eglext
-Summary:    wayland devel library
-Group:      Development/Libraries
-Requires:   %{name} = %{version}-%{release}
-
-%description eglext
-devel files for wayland
-
-%package eglext-devel
-Summary:    wayland devel library
-Group:      Development/Libraries
-Requires:   %{name} = %{version}-%{release}
-Requires:   wayland-wsegl-eglext
-
-%description eglext-devel
-devel files for wayland
-
 %prep
 %setup -q -n %{name}-%{version}
 
@@ -54,7 +37,8 @@ devel files for wayland
 # >> build pre
 # << build pre
 
-%configure --disable-static
+%qmake 
+
 make %{?jobs:-j%jobs}
 
 # >> build post
@@ -64,7 +48,7 @@ make %{?jobs:-j%jobs}
 rm -rf %{buildroot}
 # >> install pre
 # << install pre
-%make_install
+%qmake_install
 
 # >> install post
 # << install post
@@ -75,18 +59,6 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-# >> files
 %{_libdir}/waylandwsegl.so
-%{_libdir}/libwayland-egl.so.1.0
-%{_libdir}/libwayland-egl.so.1
+# >> files
 # << files
-
-%files eglext
-%defattr(-,root,root,-)
-# >> files eglext
-# << files eglext
-
-%files eglext-devel
-%defattr(-,root,root,-)
-# >> files eglext-devel
-# << files eglext-devel

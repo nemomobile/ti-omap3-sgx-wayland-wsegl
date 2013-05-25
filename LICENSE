@@ -58,7 +58,7 @@ Comment:
 
 Similar method as used in xserver-xorg-video-fbdev (SGX variant)
 
-reference/pvr2d.h:
+doc/reference/pvr2d.h:
 
 **********************************************************************
 *

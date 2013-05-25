@@ -286,6 +286,7 @@ static WSEGLError wseglInitializeDisplay
     }
     else
     {
+/*
       uint32_t id;
       id = wl_display_get_global(egldisplay->display, "wl_drm", 1);
       if (id == 0)
@@ -299,7 +300,7 @@ static WSEGLError wseglInitializeDisplay
          return WSEGL_CANNOT_INITIALISE;
       wl_drm_add_listener(egldisplay->drm, &drm_listener, egldisplay);
       wl_display_roundtrip(egldisplay->display);
-
+      */
     }
 
     *display = (WSEGLDisplayHandle)egldisplay;
@@ -451,10 +452,11 @@ static WSEGLError wseglCreateWindowDrawable
               PVR2D_HANDLE name;
 
               assert(PVR2DMemExport(egldisplay->context, 0, nativeWindow->backBuffers[index], &name) == PVR2D_OK);                 
-
+/*
               nativeWindow->drmbuffers[index] = wl_drm_create_buffer(egldisplay->drm, (uint32_t)name, 
                  nativeWindow->width, nativeWindow->height, nativeWindow->strideBytes, nativeWindow->format);
-              assert(nativeWindow->drmbuffers[index] != NULL);
+                 assert(nativeWindow->drmbuffers[index] != NULL);
+*/
             }
        }
        /* Framebuffer */
@@ -557,6 +559,8 @@ static WSEGLError wseglSwapDrawable
     }
     else if (drawable->display->display)
     { 
+        printf("STUB: wseglSwapDrawable for wayland\n");
+/*
         while (drawable->block_swap_buffers == 1)
           wl_display_iterate(drawable->display->display);
         drawable->block_swap_buffers = 1;
@@ -569,7 +573,7 @@ static WSEGLError wseglSwapDrawable
          drawable->drmbuffers[drawable->currentBackBuffer], 0, 0);
         wl_surface_damage(drawable->surface, 0, 0, drawable->width,
          drawable->height);
-
+         */
     }
     else
     {

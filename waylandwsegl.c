@@ -417,26 +417,14 @@ static WSEGLError wseglCreateWindowDrawable
               nativeWindow->numFlipBuffers = WAYLANDWSEGL_MAX_FLIP_BUFFERS;
 
        /* Workaround for broken devices, seen in debugging */
-       if (nativeWindow->numFlipBuffers < 2)
+//       if (nativeWindow->numFlipBuffers < 2)
               nativeWindow->numFlipBuffers = 0;
     }
     else
     {
        nativeWindow->display = egldisplay;
-       if (nativeWindow->visual == wl_display_get_rgb_visual(nativeWindow->display->display))
-       {
-           nativeWindow->format = WSEGL_PIXELFORMAT_565;
-       }  
-       else if (nativeWindow->visual == wl_display_get_argb_visual(nativeWindow->display->display))
-       {
-           nativeWindow->format = WSEGL_PIXELFORMAT_8888;
-       }
-       else if (nativeWindow->visual == wl_display_get_premultiplied_argb_visual(nativeWindow->display->display))
-       {
-           nativeWindow->format = WSEGL_PIXELFORMAT_8888;
-       }
-       else
-         assert(0);
+       nativeWindow->format = WSEGL_PIXELFORMAT_565;
+       // TODO: hardcoded formats because wl_display_get_rgb_visual was removed
     }
 
     /* We can't do empty buffers, so let's make a 8x8 one. */

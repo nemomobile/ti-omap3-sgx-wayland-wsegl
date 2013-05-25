@@ -219,24 +219,6 @@ static WSEGLPixelFormat getwseglPixelFormat(struct wl_egl_display *egldisplay)
     return WSEGL_SUCCESS;
 }
 
-
-
-static void
-drm_handle_device(void *data, struct wl_drm *drm, const char *device)
-{
-    wl_drm_authenticate(drm, 0);
-}
-
-static void
-drm_handle_authenticated(void *data, struct wl_drm *drm)
-{
-}
-
-static const struct wl_drm_listener drm_listener = {
- drm_handle_device,
- drm_handle_authenticated
-};
-
 /* Initialize a native display for use with WSEGL */
 static WSEGLError wseglInitializeDisplay
     (NativeDisplayType nativeDisplay, WSEGLDisplayHandle *display,
@@ -286,21 +268,7 @@ static WSEGLError wseglInitializeDisplay
     }
     else
     {
-/*
-      uint32_t id;
-      id = wl_display_get_global(egldisplay->display, "wl_drm", 1);
-      if (id == 0)
-        wl_display_roundtrip(egldisplay->display);
-      id = wl_display_get_global(egldisplay->display, "wl_drm", 1);
-      if (id == 0)
-        return WSEGL_CANNOT_INITIALISE; 
-
-      egldisplay->drm = wl_display_bind(egldisplay->display, id, &wl_drm_interface);
-      if (!egldisplay->drm)
-         return WSEGL_CANNOT_INITIALISE;
-      wl_drm_add_listener(egldisplay->drm, &drm_listener, egldisplay);
-      wl_display_roundtrip(egldisplay->display);
-      */
+        printf("wseglInitializeDisplay: STUB (wayland)\n");
     }
 
     *display = (WSEGLDisplayHandle)egldisplay;
@@ -451,12 +419,8 @@ static WSEGLError wseglCreateWindowDrawable
             {
               PVR2D_HANDLE name;
 
-              assert(PVR2DMemExport(egldisplay->context, 0, nativeWindow->backBuffers[index], &name) == PVR2D_OK);                 
-/*
-              nativeWindow->drmbuffers[index] = wl_drm_create_buffer(egldisplay->drm, (uint32_t)name, 
-                 nativeWindow->width, nativeWindow->height, nativeWindow->strideBytes, nativeWindow->format);
-                 assert(nativeWindow->drmbuffers[index] != NULL);
-*/
+              assert(PVR2DMemExport(egldisplay->context, 0, nativeWindow->backBuffers[index], &name) == PVR2D_OK);
+              printf("wseglCreateWindowDrawable: STUB (wayland)\n");
             }
        }
        /* Framebuffer */
@@ -560,20 +524,6 @@ static WSEGLError wseglSwapDrawable
     else if (drawable->display->display)
     { 
         printf("STUB: wseglSwapDrawable for wayland\n");
-/*
-        while (drawable->block_swap_buffers == 1)
-          wl_display_iterate(drawable->display->display);
-        drawable->block_swap_buffers = 1;
-        callback = wl_display_sync(drawable->display->display);
-        wl_callback_add_listener(callback, &sync_listener, drawable);
-
-        wl_buffer_damage(drawable->drmbuffers[drawable->currentBackBuffer], 0, 0,
-         drawable->width, drawable->height);
-        wl_surface_attach(drawable->surface,
-         drawable->drmbuffers[drawable->currentBackBuffer], 0, 0);
-        wl_surface_damage(drawable->surface, 0, 0, drawable->width,
-         drawable->height);
-         */
     }
     else
     {

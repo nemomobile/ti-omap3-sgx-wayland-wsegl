@@ -46,7 +46,6 @@ extern "C" {
 #include <wayland-client.h>
 #include <pvr2d.h>
 #include <linux/fb.h>
-#include "wayland-drm-client-protocol.h"
 
 typedef struct wl_display* NativeDisplayType;  
 typedef struct wl_egl_pixmap* NativePixmapType;
@@ -80,7 +79,6 @@ struct wl_egl_display {
 	WSEGLConfig wseglDisplayConfigs[3];
 	struct fb_var_screeninfo var;
 	struct fb_fix_screeninfo fix;
-	struct wl_drm *drm;
 };
 
 struct wl_egl_window {

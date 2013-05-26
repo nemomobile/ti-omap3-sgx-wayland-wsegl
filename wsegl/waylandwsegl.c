@@ -550,7 +550,9 @@ static WSEGLError wseglDeleteDrawable(WSEGLDrawableHandle _drawable)
 static void
 wayland_frame_callback(void *data, struct wl_callback *callback, uint32_t time)
 {
-    printf("wayland-wsegl: wayland_frame_callback\n");
+    //printf("wayland-wsegl: wayland_frame_callback\n");
+    struct wl_egl_window *drawable = (struct wl_egl_window *)data;
+    drawable->display->frame_callback = NULL;
     wl_callback_destroy(callback);
 }
 
@@ -572,7 +574,7 @@ static WSEGLError wseglSwapDrawable
     }
     else if (drawable->display->display)
     { 
-        printf("wseglSwapDrawable for wayland, %d %p\n", drawable->currentBackBuffer, drawable->drmbuffers[drawable->currentBackBuffer]);
+        //printf("wseglSwapDrawable for wayland, %d %p\n", drawable->currentBackBuffer, drawable->drmbuffers[drawable->currentBackBuffer]);
 
         int ret = 0;
         while (drawable->display->frame_callback && ret != -1)

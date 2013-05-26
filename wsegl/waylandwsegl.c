@@ -435,6 +435,15 @@ static WSEGLError wseglCreateWindowDrawable
 
        assert(PVR2DGetDeviceInfo(egldisplay->context, &displayInfo) == PVR2D_OK);
 
+       wsegl_debug("ulMaxFlipChains: %lu", displayInfo.ulMaxFlipChains);
+       wsegl_debug("ulMaxBuffersInChain: %lu", displayInfo.ulMaxBuffersInChain);
+       wsegl_debug("eFormat: %d", displayInfo.eFormat);
+       wsegl_debug("ulWidth: %lu", displayInfo.ulWidth);
+       wsegl_debug("ulHeight: %lu", displayInfo.ulHeight);
+       wsegl_debug("lStride: %lu", displayInfo.lStride);
+       wsegl_debug("ulMinFlipInterval: %lu", displayInfo.ulMinFlipInterval);
+       wsegl_debug("ulMaxFlipInterval: %lu", displayInfo.ulMaxFlipInterval);
+
        if (displayInfo.ulMaxFlipChains > 0 && displayInfo.ulMaxBuffersInChain > 0)
               nativeWindow->numFlipBuffers = displayInfo.ulMaxBuffersInChain;
        if (nativeWindow->numFlipBuffers > WAYLANDWSEGL_MAX_FLIP_BUFFERS)

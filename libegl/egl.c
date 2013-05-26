@@ -356,9 +356,6 @@ EGLBoolean eglCopyBuffers(EGLDisplay dpy, EGLSurface surface,
 static EGLImageKHR _my_eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
 {
 	EGL_DLSYM(&_eglCreateImageKHR, "eglCreateImageKHR");
-	EGLenum newtarget = target;
-	EGLClientBuffer newbuffer = buffer;
-
 	if (target == EGL_WAYLAND_BUFFER_WL) {
 		// TODO: finish this
 		printf("Got EGL_WAYLAND_BUFFER_WL\n");
@@ -368,7 +365,7 @@ static EGLImageKHR _my_eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum
 
 	// TODO: do stuff for wl here
 	//ws_passthroughImageKHR(&newtarget, &newbuffer);
-	EGLImageKHR ret = (*_eglCreateImageKHR)(dpy, EGL_NO_CONTEXT, newtarget, newbuffer, attrib_list);
+	EGLImageKHR ret = (*_eglCreateImageKHR)(dpy, ctx, target, buffer, attrib_list);
 	return ret;
 }
 

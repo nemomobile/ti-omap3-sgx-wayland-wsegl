@@ -717,21 +717,30 @@ static WSEGLError wseglGetDrawableParameters
     {
         struct wl_egl_pixmap *pixmap = (struct wl_egl_pixmap *) _drawable;
 
+        int strideDiv = 0;
+
+        switch (pixmap->format) {
+            case WSEGL_PIXELFORMAT_565:
+                strideDiv = 2;
+                break;
+            case WSEGL_PIXELFORMAT_8888:
+                strideDiv = 4;
+                break;
+        }
+
+        assert(strideDiv != 0);
+
         sourceParams->ui32Width = pixmap->width;
         sourceParams->ui32Height = pixmap->height;
-        // TODO: stride here should be dependent on format
-        // / 2 is assuming 16bit, / 4 is 32bit, etc.
-        sourceParams->ui32Stride = pixmap->stride / 2;
-        sourceParams->ePixelFormat = pixmap->format;   
+        sourceParams->ui32Stride = pixmap->stride / strideDiv;
+        sourceParams->ePixelFormat = pixmap->format;
         sourceParams->pvLinearAddress = pixmap->pvrmem->pBase;
         sourceParams->ui32HWAddress = pixmap->pvrmem->ui32DevAddr;
         sourceParams->hPrivateData = pixmap->pvrmem->hPrivateData;
 
         renderParams->ui32Width = pixmap->width;
         renderParams->ui32Height = pixmap->height;
-        // TODO: stride here should be dependent on format
-        // / 2 is assuming 16bit, / 4 is 32bit, etc.
-        renderParams->ui32Stride = pixmap->stride / 2;
+        renderParams->ui32Stride = pixmap->stride / strideDiv;
         renderParams->ePixelFormat = pixmap->format;
         renderParams->pvLinearAddress = pixmap->pvrmem->pBase;
         renderParams->ui32HWAddress = pixmap->pvrmem->ui32DevAddr;

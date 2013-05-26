@@ -120,7 +120,6 @@ static void _init_egl()
 }
 
 #define EGL_DLSYM(fptr, sym) do { if (_libegl == NULL) { _init_egl(); }; if (*(fptr) == NULL) { *(fptr) = (void *) dlsym(_libegl, sym); } } while (0) 
-#define GLESv2_DLSYM(fptr, sym) do { if (_libgles == NULL) { _init_egl(); }; if (*(fptr) == NULL) { *(fptr) = (void *) dlsym(_libgles, sym); } } while (0) 
 
 EGLint eglGetError(void)
 {
@@ -357,7 +356,7 @@ EGLBoolean eglCopyBuffers(EGLDisplay dpy, EGLSurface surface,
 static EGLImageKHR _my_eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
 {
 	if (_eglCreateImageKHR == NULL) {
-		/* we can't EGL_DLSYM eglGetProcAddress, because it doesn't exist in
+		/* we can't EGL_DLSYM this, because it doesn't exist in
 		 * SGX's libEGL. we also can't ask ourselves for the location of
 		 * eglGetProcAddress, otherwise we'll end up calling ourselves again, so
 		 * we must look up eglGetProcAddress first and ask SGX
@@ -378,7 +377,16 @@ static EGLImageKHR _my_eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum
 
 static void _my_glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
 {
-	GLESv2_DLSYM(&_glEGLImageTargetTexture2DOES, "glEGLImageTargetTexture2DOES");
+	if (_glEGLImageTargetTexture2DOES == NULL) {
+		/* we can't EGL_DLSYM this, because it doesn't exist in
+		 * SGX's libEGL. we also can't ask ourselves for the location of
+		 * eglGetProcAddress, otherwise we'll end up calling ourselves again, so
+		 * we must look up eglGetProcAddress first and ask SGX
+		 */
+		EGL_DLSYM(&_eglGetProcAddress, "eglGetProcAddress");
+		_glEGLImageTargetTexture2DOES = (*_eglGetProcAddress)("glEGLImageTargetTexture2DOES");
+	}
+
 	(*_glEGLImageTargetTexture2DOES)(target, image);
 	return;
 }

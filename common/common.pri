@@ -4,13 +4,15 @@ system(wayland-scanner client-header < wayland-sgx.xml > wayland-sgx-client-prot
 
 SOURCES += $$PWD/wayland-sgx-protocol.c \
            $$PWD/server_wlegl_buffer.cpp \
-           $$PWD/server_wlegl.cpp
+           $$PWD/server_wlegl.cpp \
+           $$PWD/log.c
 
 HEADERS += $$PWD/wayland-sgx-server-protocol.h \
            $$PWD/wayland-sgx-client-protocol.h \
 	   $$PWD/server_wlegl_buffer.h \
 	   $$PWD/server_wlegl.h \
-	   $$PWD/server_wlegl_private.h
+       $$PWD/server_wlegl_private.h \
+       $$PWD/log.h
 
            INCLUDEPATH += $$PWD
 

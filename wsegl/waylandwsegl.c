@@ -58,6 +58,7 @@
 #include <time.h>
 #include "linux/omapfb.h"
 
+#include "log.h"
 #include "wayland-sgx-server-protocol.h"
 #include "wayland-sgx-client-protocol.h"
 #include "server_wlegl_buffer.h"
@@ -281,7 +282,7 @@ static WSEGLError wseglInitializeDisplay
     /* If it is a framebuffer */
     if (egldisplay->display == NULL)
     {
-        printf("wayland-wsegl: Initializing framebuffer\n");
+        wsegl_info("wayland-wsegl: Initializing framebuffer");
        int fd;
        WSEGLPixelFormat format;
        
@@ -550,7 +551,7 @@ static WSEGLError wseglDeleteDrawable(WSEGLDrawableHandle _drawable)
 static void
 wayland_frame_callback(void *data, struct wl_callback *callback, uint32_t time)
 {
-    //printf("wayland-wsegl: wayland_frame_callback\n");
+    //wsegl_info("wayland-wsegl: wayland_frame_callback");
     struct wl_egl_window *drawable = (struct wl_egl_window *)data;
     drawable->display->frame_callback = NULL;
     wl_callback_destroy(callback);
@@ -569,12 +570,12 @@ static WSEGLError wseglSwapDrawable
 
     if (drawable->numFlipBuffers)
     {
-//        printf("PRESENT FLIP\n");
+//        wsegl_info("PRESENT FLIP");
         PVR2DPresentFlip(drawable->display->context, drawable->flipChain, drawable->backBuffers[drawable->currentBackBuffer], 0);
     }
     else if (drawable->display->display)
     { 
-        //printf("wseglSwapDrawable for wayland, %d %p\n", drawable->currentBackBuffer, drawable->drmbuffers[drawable->currentBackBuffer]);
+        //wsegl_info("wseglSwapDrawable for wayland, %d %p", drawable->currentBackBuffer, drawable->drmbuffers[drawable->currentBackBuffer]);
 
         int ret = 0;
         while (drawable->display->frame_callback && ret != -1)
@@ -594,9 +595,9 @@ static WSEGLError wseglSwapDrawable
                         drawable->width, drawable->height, drawable->strideBytes,
                         drawable->format, handle);
             drawable->drmbuffers[drawable->currentBackBuffer] = wlbuf;
-            printf("sgx_wlegl_create_buffer for %d\n", drawable->currentBackBuffer);
+            wsegl_info("sgx_wlegl_create_buffer for %d", drawable->currentBackBuffer);
 
-            printf("Add listener for %p with %p (buf %d) inside\n", drawable, wlbuf, drawable->currentBackBuffer);
+            wsegl_info("Add listener for %p with %p (buf %d) inside", drawable, wlbuf, drawable->currentBackBuffer);
 
             // TODO: listen for release
 

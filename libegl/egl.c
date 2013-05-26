@@ -35,6 +35,8 @@
 #include "server_wlegl_buffer.h"
 #endif
 
+#include "log.h"
+
 static void *_libegl = NULL;
 static void *_libgles = NULL;
 
@@ -135,7 +137,7 @@ EGLDisplay eglGetDisplay(EGLNativeDisplayType display_id)
 
 EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
 {
-	printf("wayland-wsegl: eglInitialize\n");
+	wsegl_info("wayland-wsegl: eglInitialize");
 	EGL_DLSYM(&_eglInitialize, "eglInitialize");
 	return (*_eglInitialize)(dpy, major, minor);
 }

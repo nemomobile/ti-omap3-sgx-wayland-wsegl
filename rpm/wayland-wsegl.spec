@@ -64,5 +64,9 @@ rm -rf %{buildroot}
 %{_libdir}/libEGL-proxy.so.1
 %{_libdir}/libEGL-proxy.so.1.0
 %{_libdir}/libEGL-proxy.so.1.0.0
+%{_libdir}/libwayland-egl.so
+%{_libdir}/libwayland-egl.so.1
+%{_libdir}/libwayland-egl.so.1.0
+%{_libdir}/libwayland-egl.so.1.0.0
 # >> files
 # << files

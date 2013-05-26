@@ -716,7 +716,7 @@ static WSEGLError wseglGetDrawableParameters
     if (eglwindow->header.type == WWSEGL_DRAWABLE_TYPE_PIXMAP)
     {
         struct wl_egl_pixmap *pixmap = (struct wl_egl_pixmap *) _drawable;
-        
+
         sourceParams->ui32Width = pixmap->width;
         sourceParams->ui32Height = pixmap->height;
         // TODO: stride here should be dependent on format

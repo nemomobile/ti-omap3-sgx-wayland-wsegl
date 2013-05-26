@@ -1,2 +1,4 @@
 TEMPLATE = subdirs
-SUBDIRS = wsegl libegl
+SUBDIRS = wsegl libegl libwayland-egl
+
+wsegl.depends = libwayland-egl

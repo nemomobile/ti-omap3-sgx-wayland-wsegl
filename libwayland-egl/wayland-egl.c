@@ -41,6 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wayland-client.h>
 #include <wayland-egl.h>
 #include "wayland-egl-priv.h"
+#include "log.h"
 
 WL_EGL_EXPORT void
 wl_egl_window_resize(struct wl_egl_window *egl_window,
@@ -68,7 +69,8 @@ wl_egl_window_create(struct wl_surface *surface,
 	egl_window->surface = surface;
 	egl_window->display = NULL;
 	egl_window->block_swap_buffers = 0;
-	memset(egl_window->backBuffers, 0, sizeof(egl_window->backBuffers));
+    memset(egl_window->backBuffers, 0, sizeof(egl_window->backBuffers));
+	memset(egl_window->drmbuffers, 0, sizeof(egl_window->drmbuffers));
 	egl_window->currentBackBuffer = -1;
 	egl_window->backBuffersValid = 0;
 	wl_egl_window_resize(egl_window, width, height, 0, 0);

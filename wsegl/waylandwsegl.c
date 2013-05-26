@@ -60,6 +60,7 @@
 
 #include "wayland-sgx-server-protocol.h"
 #include "wayland-sgx-client-protocol.h"
+#include "server_wlegl_buffer.h"
 
 static WSEGLCaps const wseglDisplayCaps[] = {
     {WSEGL_CAP_WINDOWS_USE_HW_SYNC, 1},
@@ -500,23 +501,17 @@ static WSEGLError wseglCreatePixmapDrawable
      WSEGLRotationAngle *rotationAngle)
 {
     struct wl_egl_display *egldisplay = (struct wl_egl_display *) display;
-    struct wwsegl_drawable_header *drawable_header = (struct wwsegl_drawable_header *)nativePixmap;
+    struct server_wlegl_buffer *buffer = (struct server_wlegl_buffer *)nativePixmap;
 
-    if (drawable_header->type == WWSEGL_DRAWABLE_TYPE_DRMBUFFER)
-    {
-        struct wl_egl_drmbuffer *drmbuffer = (struct wl_egl_drmbuffer *)nativePixmap;
-        struct wl_egl_pixmap *pixmap = wl_egl_pixmap_create(drmbuffer->width, drmbuffer->height, 0);
-        pixmap->display = egldisplay;
-        pixmap->stride = drmbuffer->stride;
-        pixmap->name = drmbuffer->name;
-        pixmap->format = WSEGL_PIXELFORMAT_8888;
-        assert(PVR2DMemMap(egldisplay->context, 0, (void *)pixmap->name, &pixmap->pvrmem) == PVR2D_OK);
-        *drawable = (WSEGLDrawableHandle) pixmap;         
-        *rotationAngle = WSEGL_ROTATE_0;
-        return WSEGL_SUCCESS;
-     }
-     else
-     assert(0);
+    struct wl_egl_pixmap *pixmap = wl_egl_pixmap_create(buffer->buf->width, buffer->buf->height, 0);
+    pixmap->display = egldisplay;
+    pixmap->stride = buffer->buf->stride;
+    pixmap->handle = buffer->buf->handle;
+    pixmap->format = WSEGL_PIXELFORMAT_8888; // TODO: hardcoded?
+    assert(PVR2DMemMap(egldisplay->context, 0, (void *)pixmap->handle, &pixmap->pvrmem) == PVR2D_OK);
+    *drawable = (WSEGLDrawableHandle) pixmap;
+    *rotationAngle = WSEGL_ROTATE_0;
+    return WSEGL_SUCCESS;
 }
 
 /* Delete a specific drawable */

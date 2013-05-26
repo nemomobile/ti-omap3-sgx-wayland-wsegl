@@ -129,7 +129,7 @@ struct wl_egl_pixmap {
 	struct wl_egl_display *display;
 	struct wl_visual *visual;
 	
-        int name;
+    int handle;
 	int width;
 	int height;
 
@@ -138,17 +138,6 @@ struct wl_egl_pixmap {
 	WSEGLPixelFormat   format;
  
  	PVR2DMEMINFO *pvrmem;
-};
-
-struct wl_egl_drmbuffer {
-        struct wwsegl_drawable_header header;
-	struct wl_visual      *visual;
-	
-	int name;
-	int width;
-	int height;
-	int stride;
-        
 };
 
 

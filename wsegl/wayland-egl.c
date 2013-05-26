@@ -109,7 +109,7 @@ wl_egl_pixmap_create(int width, int height,
 	egl_pixmap->display = NULL;
 	egl_pixmap->width   = width;
 	egl_pixmap->height  = height;
-	egl_pixmap->name    = 0;
+	egl_pixmap->handle    = 0;
 	egl_pixmap->stride  = 0;
 	egl_pixmap->flags   = flags;
 
@@ -126,12 +126,12 @@ wl_egl_pixmap_destroy(struct wl_egl_pixmap *egl_pixmap)
 WL_EGL_EXPORT struct wl_buffer *
 wl_egl_pixmap_create_buffer(struct wl_egl_pixmap *egl_pixmap)
 {
-	if (egl_pixmap->name == 0)
+	if (egl_pixmap->handle == 0)
 		return NULL;
 
         assert(0);
         return NULL;
-/*	return wl_drm_create_buffer(egl_display->drm, egl_pixmap->name,
+/*	return wl_drm_create_buffer(egl_display->drm, egl_pixmap->handle,
 				    egl_pixmap->width, egl_pixmap->height,
 				    egl_pixmap->stride, egl_pixmap->visual); */
 }

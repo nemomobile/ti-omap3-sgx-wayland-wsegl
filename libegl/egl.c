@@ -355,16 +355,22 @@ EGLBoolean eglCopyBuffers(EGLDisplay dpy, EGLSurface surface,
 
 static EGLImageKHR _my_eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
 {
-	EGL_DLSYM(&_eglCreateImageKHR, "eglCreateImageKHR");
+	if (_eglCreateImageKHR == NULL) {
+		/* we can't EGL_DLSYM eglGetProcAddress, because it doesn't exist in
+		 * SGX's libEGL. we also can't ask ourselves for the location of
+		 * eglGetProcAddress, otherwise we'll end up calling ourselves again, so
+		 * we must look up eglGetProcAddress first and ask SGX
+		 */
+		EGL_DLSYM(&_eglGetProcAddress, "eglGetProcAddress");
+		_eglCreateImageKHR = (*_eglGetProcAddress)("eglCreateImageKHR");
+	}
+
 	if (target == EGL_WAYLAND_BUFFER_WL) {
-		// TODO: finish this
-		printf("Got EGL_WAYLAND_BUFFER_WL\n");
-		//eglCreateImageKHR(m_egl_display, EGL_NO_CONTEXT, EGL_NATIVE_PIXMAP_KHR, drmbuffer, NULL);
+		EGLImageKHR ret = (*_eglCreateImageKHR)(dpy, EGL_NO_CONTEXT, EGL_NATIVE_PIXMAP_KHR, buffer, attrib_list);
+		return ret;
 	}
 
 
-	// TODO: do stuff for wl here
-	//ws_passthroughImageKHR(&newtarget, &newbuffer);
 	EGLImageKHR ret = (*_eglCreateImageKHR)(dpy, ctx, target, buffer, attrib_list);
 	return ret;
 }

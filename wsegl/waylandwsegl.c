@@ -353,15 +353,15 @@ static WSEGLError allocateBackBuffers(struct wl_egl_display *egldisplay, NativeW
         
         unsigned long flipId = 0;
         unsigned long numBuffers;
-        assert(PVR2DCreateFlipChain(egldisplay->context, 0,
+        PVR2DERROR ret = PVR2DCreateFlipChain(egldisplay->context, 0,
                                  //PVR2D_CREATE_FLIPCHAIN_SHARED |
                                  //PVR2D_CREATE_FLIPCHAIN_QUERY,
                                  nativeWindow->numFlipBuffers,
                                  nativeWindow->width,
                                  nativeWindow->height,
                                  wsegl2pvr2dformat(nativeWindow->format),
-                                 &stride, &flipId, &(nativeWindow->flipChain))
-                == PVR2D_OK); 
+                                 &stride, &flipId, &(nativeWindow->flipChain));
+        assert(ret == PVR2D_OK); 
         PVR2DGetFlipChainBuffers(egldisplay->context,
                                      nativeWindow->flipChain,
                                      &numBuffers,

@@ -58,6 +58,9 @@
 #include <time.h>
 #include "linux/omapfb.h"
 
+#include "wayland-sgx-server-protocol.h"
+#include "wayland-sgx-client-protocol.h"
+
 static WSEGLCaps const wseglDisplayCaps[] = {
     {WSEGL_CAP_WINDOWS_USE_HW_SYNC, 1},
     {WSEGL_CAP_PIXMAPS_USE_HW_SYNC, 1},
@@ -277,6 +280,7 @@ static WSEGLError wseglInitializeDisplay
     /* If it is a framebuffer */
     if (egldisplay->display == NULL)
     {
+        printf("wayland-wsegl: Initializing framebuffer\n");
        int fd;
        WSEGLPixelFormat format;
        
@@ -442,6 +446,7 @@ static WSEGLError wseglCreateWindowDrawable
     {
        nativeWindow->display = egldisplay;
        nativeWindow->format = WSEGL_PIXELFORMAT_565;
+
        // TODO: hardcoded formats because wl_display_get_rgb_visual was removed
     }
 
@@ -469,7 +474,9 @@ static WSEGLError wseglCreateWindowDrawable
               PVR2D_HANDLE name;
 
               assert(PVR2DMemExport(egldisplay->context, 0, nativeWindow->backBuffers[index], &name) == PVR2D_OK);
-              printf("wseglCreateWindowDrawable: STUB (wayland)\n");
+              nativeWindow->exporthandles[index] = name;
+
+              // TODO: clear exporthandles up
             }
        }
        /* Framebuffer */
@@ -546,16 +553,14 @@ static WSEGLError wseglDeleteDrawable(WSEGLDrawableHandle _drawable)
 }
 
 static void
-sync_callback(void *data, struct wl_callback *callback, uint32_t time)
+wayland_frame_callback(void *data, struct wl_callback *callback, uint32_t time)
 {
-    struct wl_egl_window *window = data;
-
-    window->block_swap_buffers = 0; /* false */
+    printf("wayland-wsegl: wayland_frame_callback\n");
     wl_callback_destroy(callback);
 }
 
-static const struct wl_callback_listener sync_listener = {
-     sync_callback
+static const struct wl_callback_listener frame_listener = {
+    wayland_frame_callback
 };
 
 /* Swap the contents of a drawable to the screen */
@@ -572,7 +577,39 @@ static WSEGLError wseglSwapDrawable
     }
     else if (drawable->display->display)
     { 
-        printf("STUB: wseglSwapDrawable for wayland\n");
+        printf("wseglSwapDrawable for wayland, %d %p\n", drawable->currentBackBuffer, drawable->drmbuffers[drawable->currentBackBuffer]);
+
+        int ret = 0;
+        while (drawable->display->frame_callback && ret != -1)
+            ret = wl_display_dispatch_queue(drawable->display->display, drawable->display->queue);
+
+        drawable->display->frame_callback = wl_surface_frame(drawable->surface);
+        wl_callback_add_listener(drawable->display->frame_callback, &frame_listener, drawable);
+        wl_proxy_set_queue((struct wl_proxy *)drawable->display->frame_callback, drawable->display->queue);
+
+        if (!drawable->drmbuffers[drawable->currentBackBuffer])
+        {
+            int32_t handle;
+            struct wl_buffer *wlbuf;
+
+            handle = drawable->exporthandles[drawable->currentBackBuffer];
+            wlbuf = sgx_wlegl_create_buffer(drawable->display->sgx_wlegl,
+                        drawable->width, drawable->height, drawable->strideBytes,
+                        drawable->format, handle);
+            drawable->drmbuffers[drawable->currentBackBuffer] = wlbuf;
+            printf("sgx_wlegl_create_buffer for %d\n", drawable->currentBackBuffer);
+
+            printf("Add listener for %p with %p (buf %d) inside\n", drawable, wlbuf, drawable->currentBackBuffer);
+
+            // TODO: listen for release
+
+            wl_proxy_set_queue((struct wl_proxy *)wlbuf, drawable->display->queue);
+        }
+
+        struct wl_buffer *wlbuf = drawable->drmbuffers[drawable->currentBackBuffer];
+        wl_surface_attach(drawable->surface, wlbuf, 0, 0); 
+        wl_surface_damage(drawable->surface, 0, 0, drawable->width, drawable->height);
+        wl_surface_commit(drawable->surface);
     }
     else
     {

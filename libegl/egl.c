@@ -136,6 +136,7 @@ EGLDisplay eglGetDisplay(EGLNativeDisplayType display_id)
 
 EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
 {
+	printf("wayland-wsegl: eglInitialize\n");
 	EGL_DLSYM(&_eglInitialize, "eglInitialize");
 	return (*_eglInitialize)(dpy, major, minor);
 }

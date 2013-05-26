@@ -507,7 +507,7 @@ static WSEGLError wseglCreatePixmapDrawable
     pixmap->display = egldisplay;
     pixmap->stride = buffer->buf->stride;
     pixmap->handle = buffer->buf->handle;
-    pixmap->format = WSEGL_PIXELFORMAT_8888; // TODO: hardcoded?
+    pixmap->format = buffer->buf->format;
     assert(PVR2DMemMap(egldisplay->context, 0, (void *)pixmap->handle, &pixmap->pvrmem) == PVR2D_OK);
     *drawable = (WSEGLDrawableHandle) pixmap;
     *rotationAngle = WSEGL_ROTATE_0;
@@ -719,7 +719,7 @@ static WSEGLError wseglGetDrawableParameters
         sourceParams->ui32Width = pixmap->width;
         sourceParams->ui32Height = pixmap->height;
         sourceParams->ui32Stride = pixmap->stride / 4;
-        sourceParams->ePixelFormat = WSEGL_PIXELFORMAT_8888;   
+        sourceParams->ePixelFormat = pixmap->format;   
         sourceParams->pvLinearAddress = pixmap->pvrmem->pBase;
         sourceParams->ui32HWAddress = pixmap->pvrmem->ui32DevAddr;
         sourceParams->hPrivateData = pixmap->pvrmem->hPrivateData;
@@ -727,7 +727,7 @@ static WSEGLError wseglGetDrawableParameters
         renderParams->ui32Width = pixmap->width;
         renderParams->ui32Height = pixmap->height;
         renderParams->ui32Stride = pixmap->stride / 4;
-        renderParams->ePixelFormat = WSEGL_PIXELFORMAT_8888;
+        renderParams->ePixelFormat = pixmap->format;
         renderParams->pvLinearAddress = pixmap->pvrmem->pBase;
         renderParams->ui32HWAddress = pixmap->pvrmem->ui32DevAddr;
         renderParams->hPrivateData = pixmap->pvrmem->hPrivateData;

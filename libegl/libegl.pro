@@ -1,5 +1,5 @@
 TEMPLATE = lib
-TARGET = EGL-proxy
+TARGET = EGL
 
 QT = 
 SOURCES = egl.c

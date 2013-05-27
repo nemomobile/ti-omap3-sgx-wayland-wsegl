@@ -68,8 +68,7 @@ wl_egl_window_create(struct wl_surface *surface,
         egl_window->header.type = WWSEGL_DRAWABLE_TYPE_WINDOW;
 	egl_window->surface = surface;
 	egl_window->display = NULL;
-	egl_window->block_swap_buffers = 0;
-    memset(egl_window->backBuffers, 0, sizeof(egl_window->backBuffers));
+	memset(egl_window->backBuffers, 0, sizeof(egl_window->backBuffers));
 	memset(egl_window->drmbuffers, 0, sizeof(egl_window->drmbuffers));
 	egl_window->currentBackBuffer = -1;
 	egl_window->backBuffersValid = 0;
@@ -77,7 +76,6 @@ wl_egl_window_create(struct wl_surface *surface,
 	egl_window->attached_width  = 0;
 	egl_window->attached_height = 0;
 	egl_window->numFlipBuffers = 0;
-        egl_window->usingFlipBuffers = 0;
 	return egl_window;
 }
 

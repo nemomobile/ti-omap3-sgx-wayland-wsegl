@@ -117,10 +117,6 @@ struct wl_egl_window {
 	
 	int                 currentBackBuffer;
 	int                 backBuffersValid;
-
-	int		   block_swap_buffers;
-	int 		   usingFlipBuffers;
-
 };
 
 struct wl_egl_pixmap {

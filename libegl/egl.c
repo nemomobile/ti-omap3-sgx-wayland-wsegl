@@ -19,6 +19,12 @@
 #define EGL_EGLEXT_PROTOTYPES
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+
+#ifndef EGL_WAYLAND_BUFFER_WL
+/* TI headers don't define this */
+#define EGL_WAYLAND_BUFFER_WL    0x31D5 /* eglCreateImageKHR target */
+#endif
+
 #include <dlfcn.h>
 #include <stddef.h>
 #include <stdlib.h>

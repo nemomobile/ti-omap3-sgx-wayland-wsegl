@@ -11,6 +11,8 @@ Description: |
     - Something
 PkgBR:
     - ti-omap3-sgx-devel
+    - ti-omap3-sgx-libEGL-devel
+    - qt-devel
 PkgConfigBR:
     - libffi
     - wayland-client

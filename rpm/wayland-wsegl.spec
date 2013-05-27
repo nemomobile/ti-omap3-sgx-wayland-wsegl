@@ -22,6 +22,8 @@ BuildRequires:  pkgconfig(libffi)
 BuildRequires:  pkgconfig(wayland-client)
 BuildRequires:  pkgconfig(wayland-server)
 BuildRequires:  ti-omap3-sgx-devel
+BuildRequires:  ti-omap3-sgx-libEGL-devel
+BuildRequires:  qt-devel
 
 %description
 - Something

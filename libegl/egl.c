@@ -118,7 +118,7 @@ static __eglMustCastToProperFunctionPointerType (*_eglGetProcAddress)(const char
 
 static void _init_egl()
 {
-	_libegl = (void *) dlopen(getenv("LIBEGL") ? getenv("LIBEGL") : "/system/lib/libEGL.so", RTLD_LAZY);
+	_libegl = (void *) dlopen(getenv("LIBEGL") ? getenv("LIBEGL") : "/usr/lib/libEGL-sgx.so", RTLD_LAZY);
 }
 
 #define EGL_DLSYM(fptr, sym) do { if (_libegl == NULL) { _init_egl(); }; if (*(fptr) == NULL) { *(fptr) = (void *) dlsym(_libegl, sym); } } while (0) 

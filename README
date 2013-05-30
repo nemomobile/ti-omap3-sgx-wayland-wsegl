@@ -1,6 +1,26 @@
-
 This is a proof of concept Wayland WSEGL, which enables the use of SGX
 hardware buffers as pixmaps, effectively making wayland available on SGX
 devices.
 
-Contact me on irc.freenode.net 'Stskeeps' if you have any questions
+To use it, you want to do something like this:
+- mv /usr/lib/libEGL.so /usr/lib/libEGL-sgx.so
+- install the libEGl "proxy" (it'll send calls to libEGL-sgx.so, and do some extra
+  lifting for wayland)
+- install the wsegl plugin
+- edit /etc/powervr.ini, adding the following to the [default] section:
+  WindowSystem=/usr/lib/waylandwsegl.so
+
+Make sure you have X and anything using X killed off.
+
+To test it, you'll want to run e.g. qml-compositor with something like this:
+    cd /usr/lib/qt5/examples/qtwayland/qml-compositor/
+    QT_QPA_EGLFS_DEPTH=16 QT_COMPOSITOR_NEGATE_INVERTED_Y=1 ./qml-compositor -platform eglfs
+
+And you can then run clients like this:
+    QT_QPA_EGLFS_DEPTH=16 QT_WAYLAND_DISABLE_WINDOWDECORATION=1 /usr/lib/qt5/bin/qmlscene -platform wayland test.qml
+
+Debugging:
+WAYLAND_DEBUG=1
+WSEGL_DEBUG=5
+LIBEGL=/usr/lib/libEGL-sgx.so
+... other magical incantations?

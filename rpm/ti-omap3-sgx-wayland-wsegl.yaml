@@ -11,6 +11,7 @@ Description: |
     - Something
 Conflicts:
     - ti-omap3-sgx <= 1.4.268.1
+    - mesa-llvmpipe-libEGL
 Requires:
     - ti-omap3-sgx >= 1.4.268.2
 Provides:

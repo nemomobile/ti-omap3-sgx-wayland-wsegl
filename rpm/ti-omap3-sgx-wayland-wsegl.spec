@@ -28,6 +28,7 @@ BuildRequires:  qt-devel
 Provides:   libEGL
 Provides:   libEGL.so.1
 Conflicts:   ti-omap3-sgx <= 1.4.268.1
+Conflicts:   mesa-llvmpipe-libEGL
 
 %description
 - Something

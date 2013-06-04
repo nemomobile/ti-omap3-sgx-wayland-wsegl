@@ -16,6 +16,7 @@ License:    Undecided
 URL:        http://foobar.com
 Source0:    %{name}-%{version}.tar.gz
 Source100:  wayland-wsegl.yaml
+Requires:   ti-omap3-sgx >= 1.4.268.2
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires:  pkgconfig(libffi)
@@ -24,6 +25,7 @@ BuildRequires:  pkgconfig(wayland-server)
 BuildRequires:  ti-omap3-sgx-devel
 BuildRequires:  ti-omap3-sgx-libEGL-devel
 BuildRequires:  qt-devel
+Conflicts:   ti-omap3-sgx <= 14.268.1
 
 %description
 - Something

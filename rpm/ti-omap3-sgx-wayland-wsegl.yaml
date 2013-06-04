@@ -13,6 +13,9 @@ Conflicts:
     - ti-omap3-sgx <= 14.268.1
 Requires:
     - ti-omap3-sgx >= 1.4.268.2
+Provides:
+    - libEGL
+    - libEGL.so.1
 PkgBR:
     - ti-omap3-sgx-devel
     - ti-omap3-sgx-libEGL-devel

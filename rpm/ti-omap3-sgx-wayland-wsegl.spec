@@ -25,6 +25,8 @@ BuildRequires:  pkgconfig(wayland-server)
 BuildRequires:  ti-omap3-sgx-devel
 BuildRequires:  ti-omap3-sgx-libEGL-devel
 BuildRequires:  qt-devel
+Provides:   libEGL
+Provides:   libEGL.so.1
 Conflicts:   ti-omap3-sgx <= 14.268.1
 
 %description

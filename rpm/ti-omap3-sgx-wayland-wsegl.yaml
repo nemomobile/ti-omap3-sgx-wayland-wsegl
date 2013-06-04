@@ -10,7 +10,7 @@ Sources:
 Description: |
     - Something
 Conflicts:
-    - ti-omap3-sgx <= 14.268.1
+    - ti-omap3-sgx <= 1.4.268.1
 Requires:
     - ti-omap3-sgx >= 1.4.268.2
 Provides:

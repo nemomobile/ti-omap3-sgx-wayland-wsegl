@@ -24,6 +24,8 @@ wsegl_info(const char *fmt, ...)
     if (logLevel == 0)
         return;
 
+    printf("wsegl INFO (tid %d) ", pthread_self());
+
     va_list args;
     va_start(args, fmt);
     vprintf(fmt, args);
@@ -38,7 +40,9 @@ wsegl_debug(const char *fmt, ...)
     log_init();
 
     if (logLevel < 2)
-        return;
+    return;
+
+    printf("wsegl DEBUG (tid %d) ", pthread_self());
 
     va_list args;
     va_start(args, fmt);

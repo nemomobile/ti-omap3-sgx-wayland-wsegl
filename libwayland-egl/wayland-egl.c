@@ -70,6 +70,7 @@ wl_egl_window_create(struct wl_surface *surface,
 	egl_window->display = NULL;
 	memset(egl_window->backBuffers, 0, sizeof(egl_window->backBuffers));
 	memset(egl_window->drmbuffers, 0, sizeof(egl_window->drmbuffers));
+	memset(egl_window->bufferBusy, 0, sizeof(egl_window->bufferBusy));
 	egl_window->currentBackBuffer = -1;
 	egl_window->backBuffersValid = 0;
 	wl_egl_window_resize(egl_window, width, height, 0, 0);

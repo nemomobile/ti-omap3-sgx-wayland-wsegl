@@ -114,6 +114,7 @@ struct wl_egl_window {
     PVR2DMEMINFO       *flipBuffers[WAYLANDWSEGL_MAX_FLIP_BUFFERS];
 
     PVR2D_HANDLE exporthandles[WAYLANDWSEGL_MAX_BACK_BUFFERS];
+	char bufferBusy[WAYLANDWSEGL_MAX_BACK_BUFFERS];
 	
 	int                 currentBackBuffer;
 	int                 backBuffersValid;

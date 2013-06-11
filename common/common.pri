@@ -16,4 +16,4 @@ HEADERS += $$PWD/wayland-sgx-server-protocol.h \
 
            INCLUDEPATH += $$PWD
 
-
+LIBS += -lpthread

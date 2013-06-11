@@ -240,10 +240,11 @@ static const struct wl_registry_listener registry_listener = {
 
 static void roundtrip_callback(void *data, struct wl_callback *callback, uint32_t serial)
 {
-   int *done = (int *)data;
+    int *done = (int *)data;
+    wsegl_debug("roundtrip_callback: waiting done");
 
-   *done = 1;
-   wl_callback_destroy(callback);
+    *done = 1;
+    wl_callback_destroy(callback);
 }
 
 static const struct wl_callback_listener roundtrip_listener = {
@@ -252,6 +253,7 @@ static const struct wl_callback_listener roundtrip_listener = {
 
 int wayland_roundtrip(struct wl_egl_display *display)
 {
+    wsegl_debug("wayland_roundtrip: waiting on queue %p", display->queue);
     struct wl_callback *callback;
     int done = 0, ret = 0;
     wl_display_dispatch_queue_pending(display->display, display->queue);
@@ -282,7 +284,7 @@ static WSEGLError wseglInitializeDisplay
     /* If it is a framebuffer */
     if (egldisplay->display == NULL)
     {
-        wsegl_info("wayland-wsegl: Initializing framebuffer");
+        wsegl_info("wseglInitializeDisplay: Initializing framebuffer");
        int fd;
        WSEGLPixelFormat format;
        
@@ -316,7 +318,9 @@ static WSEGLError wseglInitializeDisplay
     }
     else
     {
+        wsegl_debug("wseglInitializeDisplay: initializing wayland display");
         egldisplay->queue = wl_display_create_queue(nativeDisplay);
+        wsegl_debug("wseglInitializeDisplay: created queue %p", egldisplay->queue);
         egldisplay->frame_callback = NULL;
         egldisplay->registry = wl_display_get_registry(nativeDisplay);
         wl_proxy_set_queue(egldisplay->registry, egldisplay->queue);
@@ -540,7 +544,7 @@ static WSEGLError wseglDeleteDrawable(WSEGLDrawableHandle _drawable)
             wl_buffer_destroy(drawable->drmbuffers[index]);
          if (drawable->backBuffers[index])
             PVR2DMemFree(drawable->display->context, drawable->backBuffers[index]);
-            
+         drawable->bufferBusy[index] = 0;
     }
     memset(drawable->backBuffers, 0, sizeof(drawable->backBuffers));
   
@@ -560,7 +564,7 @@ static WSEGLError wseglDeleteDrawable(WSEGLDrawableHandle _drawable)
 static void
 wayland_frame_callback(void *data, struct wl_callback *callback, uint32_t time)
 {
-    //wsegl_info("wayland-wsegl: wayland_frame_callback");
+    wsegl_info("wayland_frame_callback: wayland_frame_callback");
     struct wl_egl_window *drawable = (struct wl_egl_window *)data;
     drawable->display->frame_callback = NULL;
     wl_callback_destroy(callback);
@@ -568,6 +572,28 @@ wayland_frame_callback(void *data, struct wl_callback *callback, uint32_t time)
 
 static const struct wl_callback_listener frame_listener = {
     wayland_frame_callback
+};
+
+static void
+wl_buffer_release(void *data, struct wl_buffer *buffer)
+{
+    struct wl_egl_window *drawable = (struct wl_egl_window *)data;
+    int i;
+
+    for (i = 0; i < WAYLANDWSEGL_MAX_BACK_BUFFERS; ++i) {
+        if (drawable->drmbuffers[i] == buffer) {
+            wsegl_debug("wl_buffer_release: released buffer %d (%p) data %p", i, buffer, data);
+            drawable->bufferBusy[i] = 0;
+            return;
+        }
+    }
+
+    wsegl_info("wl_buffer_release: didn't find buffer for release: %p %p", buffer, data);
+    abort();
+}
+
+static struct wl_buffer_listener wl_buffer_listener = {
+    wl_buffer_release
 };
 
 /* Swap the contents of a drawable to the screen */
@@ -581,16 +607,32 @@ static WSEGLError wseglSwapDrawable
     {
 //        wsegl_info("PRESENT FLIP");
         PVR2DPresentFlip(drawable->display->context, drawable->flipChain, drawable->backBuffers[drawable->currentBackBuffer], 0);
+       drawable->currentBackBuffer   
+           = (drawable->currentBackBuffer + 1) % WAYLANDWSEGL_MAX_BACK_BUFFERS;
     }
     else if (drawable->display->display)
     { 
         //wsegl_info("wseglSwapDrawable for wayland, %d %p", drawable->currentBackBuffer, drawable->drmbuffers[drawable->currentBackBuffer]);
 
         int ret = 0;
-        while (drawable->display->frame_callback && ret != -1)
+        while (drawable->display->frame_callback && ret != -1) {
+            wsegl_debug("wseglSwapDrawable: wl_display_dispatch_queue loop for %p, ret %d fc %p", drawable->display->queue, ret, drawable->display->frame_callback);
             ret = wl_display_dispatch_queue(drawable->display->display, drawable->display->queue);
+        }
+
+        // find a free back buffer
+        drawable->currentBackBuffer = 0;
+        while (drawable->bufferBusy[drawable->currentBackBuffer]) {
+            if (drawable->currentBackBuffer >= WAYLANDWSEGL_MAX_BACK_BUFFERS) {
+                wsegl_debug("wseglSwapDrawable: no free backbuffers; aborting");
+                abort();
+            }
+            wsegl_debug("wseglSwapDrawable: buffer %d is busy", drawable->currentBackBuffer);
+            drawable->currentBackBuffer++;
+        }
 
         drawable->display->frame_callback = wl_surface_frame(drawable->surface);
+        wsegl_debug("wseglSwapDrawable: picked back buffer %d, setting frame_callback %p on queue %p", drawable->currentBackBuffer, drawable->display->frame_callback, drawable->display->queue);
         wl_callback_add_listener(drawable->display->frame_callback, &frame_listener, drawable);
         wl_proxy_set_queue((struct wl_proxy *)drawable->display->frame_callback, drawable->display->queue);
 
@@ -604,12 +646,8 @@ static WSEGLError wseglSwapDrawable
                         drawable->width, drawable->height, drawable->strideBytes,
                         drawable->format, handle);
             drawable->drmbuffers[drawable->currentBackBuffer] = wlbuf;
-            wsegl_info("sgx_wlegl_create_buffer for %d", drawable->currentBackBuffer);
-
-            wsegl_info("Add listener for %p with %p (buf %d) inside", drawable, wlbuf, drawable->currentBackBuffer);
-
-            // TODO: listen for release
-
+            wsegl_info("sgx_wlegl_create_buffer for %d, creating listener for %p with %p (buf %d) inside, queue %p", drawable->currentBackBuffer, drawable, wlbuf, drawable->currentBackBuffer, drawable->display->queue);
+            wl_buffer_add_listener(wlbuf, &wl_buffer_listener, drawable);
             wl_proxy_set_queue((struct wl_proxy *)wlbuf, drawable->display->queue);
         }
 
@@ -617,6 +655,7 @@ static WSEGLError wseglSwapDrawable
         wl_surface_attach(drawable->surface, wlbuf, 0, 0); 
         wl_surface_damage(drawable->surface, 0, 0, drawable->width, drawable->height);
         wl_surface_commit(drawable->surface);
+        drawable->bufferBusy[drawable->currentBackBuffer] = 1;
     }
     else
     {
@@ -656,10 +695,9 @@ static WSEGLError wseglSwapDrawable
        update_window.format = 0;
 
        assert(ioctl(drawable->display->fd, OMAPFB_UPDATE_WINDOW, &update_window) == 0);
+       drawable->currentBackBuffer   
+           = (drawable->currentBackBuffer + 1) % WAYLANDWSEGL_MAX_BACK_BUFFERS;
     }
-    
-    drawable->currentBackBuffer   
-      = (drawable->currentBackBuffer + 1) % WAYLANDWSEGL_MAX_BACK_BUFFERS;
 
     return WSEGL_SUCCESS;
 }

@@ -456,9 +456,7 @@ static WSEGLError wseglCreateWindowDrawable
     else
     {
        nativeWindow->display = egldisplay;
-       nativeWindow->format = WSEGL_PIXELFORMAT_565;
-
-       // TODO: hardcoded formats because wl_display_get_rgb_visual was removed
+       nativeWindow->format = config->ePixelFormat;
     }
 
     /* We can't do empty buffers, so let's make a 8x8 one. */

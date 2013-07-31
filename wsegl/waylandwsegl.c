@@ -538,6 +538,7 @@ static WSEGLError wseglDeleteDrawable(WSEGLDrawableHandle _drawable)
                 PVR2DMemFree(drawable->display->context, drawable->backBuffers[index]);
         }
 
+        memset(drawable->drmbuffers, 0, sizeof(drawable->drmbuffers));
         memset(drawable->backBuffers, 0, sizeof(drawable->backBuffers));
         drawable->backBuffersValid = 0;
         return WSEGL_SUCCESS;

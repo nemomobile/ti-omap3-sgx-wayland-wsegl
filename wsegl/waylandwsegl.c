@@ -525,34 +525,31 @@ static WSEGLError wseglCreatePixmapDrawable
 /* Delete a specific drawable */
 static WSEGLError wseglDeleteDrawable(WSEGLDrawableHandle _drawable)
 {
-   struct wl_egl_window *drawable = (struct wl_egl_window *) _drawable;
+    struct wl_egl_window *drawable = (struct wl_egl_window *) _drawable;
 
-   int index;
-   int numBuffers = WAYLANDWSEGL_MAX_BACK_BUFFERS;
+    int index;
+    int numBuffers = WAYLANDWSEGL_MAX_BACK_BUFFERS;
 
-   if (drawable->header.type == WWSEGL_DRAWABLE_TYPE_WINDOW)
-   {
-       
-      for (index = 0; index < numBuffers; ++index) {
-         if (drawable->drmbuffers[index])
-            wl_buffer_destroy(drawable->drmbuffers[index]);
-         if (drawable->backBuffers[index])
-            PVR2DMemFree(drawable->display->context, drawable->backBuffers[index]);
-            
+    if (drawable->header.type == WWSEGL_DRAWABLE_TYPE_WINDOW) {
+        for (index = 0; index < numBuffers; ++index) {
+            if (drawable->drmbuffers[index])
+                wl_buffer_destroy(drawable->drmbuffers[index]);
+            if (drawable->backBuffers[index])
+                PVR2DMemFree(drawable->display->context, drawable->backBuffers[index]);
+        }
+
+        memset(drawable->drmbuffers, 0, sizeof(drawable->drmbuffers));
+        memset(drawable->backBuffers, 0, sizeof(drawable->backBuffers));
+        drawable->backBuffersValid = 0;
+        return WSEGL_SUCCESS;
+    } else if (drawable->header.type == WWSEGL_DRAWABLE_TYPE_PIXMAP) {
+        struct wl_egl_pixmap *pixmap = (struct wl_egl_pixmap *)drawable;
+        PVR2DMemFree(pixmap->display->context, pixmap->pvrmem);
+    } else {
+        assert(0);
     }
-    memset(drawable->backBuffers, 0, sizeof(drawable->backBuffers));
-  
-    drawable->backBuffersValid = 0;
 
     return WSEGL_SUCCESS;
-   }
-   else if (drawable->header.type == WWSEGL_DRAWABLE_TYPE_PIXMAP)
-   {
-      struct wl_egl_pixmap *pixmap = (struct wl_egl_pixmap *)drawable;
-      PVR2DMemFree(pixmap->display->context, pixmap->pvrmem);
-   }
-   else assert(0);
-   return WSEGL_SUCCESS;
 }
 
 static void

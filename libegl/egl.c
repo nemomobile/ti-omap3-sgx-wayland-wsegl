@@ -25,6 +25,12 @@
 #define EGL_WAYLAND_BUFFER_WL    0x31D5 /* eglCreateImageKHR target */
 #endif
 
+#ifndef EGL_WAYLAND_Y_INVERTED_WL
+/* TI headers don't define this */
+#define EGL_WAYLAND_Y_INVERTED_WL   0x31DB /* eglQueryWaylandBufferWL 
+attribute */
+#endif
+
 #include <dlfcn.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -403,6 +409,12 @@ static EGLBoolean _my_eglQueryWaylandBufferWL(EGLDisplay dpy, struct wl_buffer *
 		*value = awb->height;
 		return EGL_TRUE;
 	}
+#if defined(EGL_WAYLAND_Y_INVERTED_WL)
+	else if (attribute == EGL_WAYLAND_Y_INVERTED_WL) {
+		*value = EGL_TRUE;
+		return EGL_TRUE;
+	}
+#endif
 
 	return EGL_FALSE;
 }

@@ -1,33 +1,67 @@
-/******************************************************************************
- Name         : wsegl.h
- Copyright    :	Copyright (c) Imagination Technologies Limited.
-				This specification is protected by copyright laws and contains
-				material proprietary to Imagination Technologies Limited.
-				You may use and distribute this specification free of charge for implementing
-				the functionality therein, without altering or removing any trademark, copyright,
-				or other notice from the specification.
- Platform     : ANSI
-*****************************************************************************/
+/*************************************************************************/ /*!
+@Copyright      Copyright (c) Imagination Technologies Ltd. All Rights Reserved
+@License        Dual MIT/GPLv2
 
+The contents of this file are subject to the MIT license as set out below.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+Alternatively, the contents of this file may be used under the terms of
+the GNU General Public License Version 2 ("GPL") in which case the provisions
+of GPL are applicable instead of those above.
+
+If you wish to allow use of your version of this file only under the terms of
+GPL, and not to allow others to use your version of this file under the terms
+of the MIT license, indicate your decision by deleting the provisions above
+and replace them with the notice and other provisions required by GPL as set
+out in the file called "GPL-COPYING" included in this distribution. If you do
+not delete the provisions above, a recipient may use your version of this file
+under the terms of either the MIT license or GPL.
+ 
+This License is also included in this distribution in the file called
+"MIT-COPYING".
+
+EXCEPT AS OTHERWISE STATED IN A NEGOTIATED AGREEMENT: (A) THE SOFTWARE IS
+PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT; AND (B) IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+*/ /**************************************************************************/
 
 #if !defined(__WSEGL_H__)
 #define __WSEGL_H__
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*
 // WSEGL Platform-specific definitions
 */
+#if defined(__linux__)
+#define WSEGL_EXPORT __attribute__((visibility("default")))
+#define WSEGL_IMPORT
+#else
 #define WSEGL_EXPORT
 #define WSEGL_IMPORT
+#endif
 
 /*
 // WSEGL API Version Number
 */
 
-#define WSEGL_VERSION 1
+#define WSEGL_VERSION 4
 #define WSEGL_DEFAULT_DISPLAY 0
 #define WSEGL_DEFAULT_NATIVE_ENGINE 0
 
@@ -54,6 +88,11 @@ typedef enum WSEGLCapsType_TAG
 	WSEGL_CAP_WINDOWS_USE_HW_SYNC = 3, /* System default value = 0 (FALSE) */
 	WSEGL_CAP_PIXMAPS_USE_HW_SYNC = 4, /* System default value = 0 (FALSE) */
 
+	/* When this capability is set, the EGL lock is not taken around calls
+	   to WSEGL functions. The WSEGL module is responsible for performing
+	   its own locking in this case. */
+	WSEGL_CAP_UNLOCKED = 5, /* System default value = 0 */
+
 } WSEGLCapsType;
 
 /*
@@ -73,16 +112,50 @@ typedef struct WSEGLCaps_TAG
 #define WSEGL_DRAWABLE_WINDOW		0x1
 #define WSEGL_DRAWABLE_PIXMAP		0x2
 
+/*
+// YUV format flags and sync
+*/
+#define WSEGL_FLAGS_YUV_CONFORMANT_RANGE		(0 << 0)
+#define WSEGL_FLAGS_YUV_FULL_RANGE				(1 << 0)
+#define WSEGL_FLAGS_YUV_BT601					(0 << 1)
+#define WSEGL_FLAGS_YUV_BT709					(1 << 1)
+#define WSEGL_FLAGS_EGLIMAGE_COMPOSITION_SYNC	(1 << 2)
+
+/*
+// Maximum number of optional PowerVR Services 4 SYNCINFO objects
+*/
+#define WSEGL_MAX_SRC_SYNCS 32
 
 /*
 // Pixel format of display/drawable
 */
 typedef enum WSEGLPixelFormat_TAG
 {
-	WSEGL_PIXELFORMAT_565 = 0,
-	WSEGL_PIXELFORMAT_4444 = 1,
-	WSEGL_PIXELFORMAT_8888 = 2,
-	WSEGL_PIXELFORMAT_1555 = 3
+	/* These must not be re-ordered */
+	WSEGL_PIXELFORMAT_RGB565	= 0,
+	WSEGL_PIXELFORMAT_ARGB4444	= 1,
+	WSEGL_PIXELFORMAT_ARGB8888	= 2,
+	WSEGL_PIXELFORMAT_ARGB1555	= 3,
+	WSEGL_PIXELFORMAT_ABGR8888	= 4,
+	WSEGL_PIXELFORMAT_XBGR8888	= 5,
+	WSEGL_PIXELFORMAT_NV12		= 6,
+	WSEGL_PIXELFORMAT_YUYV		= 7,
+	WSEGL_PIXELFORMAT_YV12		= 8,
+	WSEGL_PIXELFORMAT_XRGB8888	= 9,
+	WSEGL_PIXELFORMAT_UYVY		= 10,
+	WSEGL_PIXELFORMAT_NV12_4KALIGN = 11,
+	WSEGL_PIXELFORMAT_NV21_4KALIGN = 12,
+	WSEGL_PIXELFORMAT_R8		= 13,
+	WSEGL_PIXELFORMAT_R8G8		= 14,
+	WSEGL_PIXELFORMAT_NV21		= 15,
+
+	/* These are compatibility names only; new WSEGL
+	 * modules should not use them.
+	 */
+	WSEGL_PIXELFORMAT_565		= WSEGL_PIXELFORMAT_RGB565,
+	WSEGL_PIXELFORMAT_4444		= WSEGL_PIXELFORMAT_ARGB4444,
+	WSEGL_PIXELFORMAT_8888		= WSEGL_PIXELFORMAT_ARGB8888,
+	WSEGL_PIXELFORMAT_1555		= WSEGL_PIXELFORMAT_ARGB1555,
 
 } WSEGLPixelFormat;
 
@@ -105,29 +178,31 @@ typedef struct WSEGLConfig_TAG
 	// Type of drawables this configuration applies to -
 	// OR'd values of drawable types. 
 	*/
-	unsigned long ui32DrawableType;
+	unsigned long			ui32DrawableType;
 
 	/* Pixel format */
-	WSEGLPixelFormat ePixelFormat;
+	WSEGLPixelFormat		ePixelFormat;
 
 	/* Native Renderable  - set to WSEGL_TRUE if native renderable */
-	unsigned long ulNativeRenderable;
+	unsigned long			ulNativeRenderable;
 
 	/* FrameBuffer Level Parameter */
-	unsigned long ulFrameBufferLevel;
+	unsigned long			ulFrameBufferLevel;
 
 	/* Native Visual ID */
-	unsigned long ulNativeVisualID;
+	unsigned long			ulNativeVisualID;
 
 	/* Native Visual */
-	void *hNativeVisual;
+	unsigned long			ulNativeVisualType;
 
 	/* Transparent Type */
-	WSEGLTransparentType eTransparentType;
+	WSEGLTransparentType	eTransparentType;
 
 	/* Transparent Color - only used if transparent type is COLOR_KEY */
-	unsigned long ulTransparentColor; /* packed as 0x00RRGGBB */
+	unsigned long			ulTransparentColor; /* packed as 0x00RRGGBB */
 
+	/* Framebuffer Target - set to WSEGL_TRUE if config compatible with framebuffer */
+	unsigned long			ulFramebufferTarget;
 
 } WSEGLConfig;
 
@@ -143,8 +218,14 @@ typedef enum WSEGLError_TAG
 	WSEGL_BAD_NATIVE_PIXMAP = 4,
 	WSEGL_BAD_NATIVE_ENGINE = 5,
 	WSEGL_BAD_DRAWABLE = 6,
-	WSEGL_BAD_CONFIG = 7,
-	WSEGL_OUT_OF_MEMORY = 8
+	WSEGL_BAD_MATCH = 7,
+	WSEGL_OUT_OF_MEMORY = 8,
+	WSEGL_RETRY = 9,
+
+	/* These are compatibility names only; new WSEGL
+	 * modules should not use them.
+	 */
+	WSEGL_BAD_CONFIG = WSEGL_BAD_MATCH,
 
 } WSEGLError; 
 
@@ -166,25 +247,46 @@ typedef enum WSEGLRotationAngle_TAG
 typedef struct WSEGLDrawableParams_TAG
 {
 	/* Width in pixels of the drawable */
-	unsigned long	ui32Width;
+	unsigned long			ui32Width;
 
 	/* Height in pixels of the drawable */
-	unsigned long	ui32Height;
+	unsigned long			ui32Height;
 
 	/* Stride in pixels of the drawable */
-	unsigned long	ui32Stride;
+	unsigned long			ui32Stride;
 
 	/* Pixel format of the drawable */
-	WSEGLPixelFormat	ePixelFormat;
+	WSEGLPixelFormat		ePixelFormat;
 
 	/* User space cpu virtual address of the drawable */
-	void   			*pvLinearAddress;
+	void   					*pvLinearAddress;
 
 	/* HW address of the drawable */
-	unsigned long	ui32HWAddress;
+	unsigned long			ui32HWAddress;
 
-	/* Private data for the drawable */
-	void			*hPrivateData;
+	/* Override display's HW_SYNC mode */
+	unsigned long			bWaitForRender;
+
+	/* Flags */
+	unsigned long			ulFlags;
+
+	/* Rotation angle of drawable (presently source only) */
+	WSEGLRotationAngle		eRotationAngle;
+
+	/*
+	// Optional PowerVR Services 4 MEMINFO pointer. This may be used for
+	// internal (implicit) synchronization purposes, and by PDUMP. It should
+	// refer to the same object as the other fields in this structure.
+	*/
+	void					*hMemInfo;
+
+	/*
+	// Optional PowerVR Services 4 SYNCINFO pointers to sent down as source
+	// surface (texture) dependencies of a render. If these are provided
+	// when not applicable, they will be ignored. If a sync is not needed,
+	// it should be passed as NULL.
+	*/
+	void					*ahSyncInfo[WSEGL_MAX_SRC_SYNCS];
 
 } WSEGLDrawableParams;
 
@@ -221,8 +323,18 @@ typedef struct WSEGL_FunctionTable_TAG
 
 	WSEGLError (*pfnWSEGL_CopyFromPBuffer)(void *, unsigned long, unsigned long, unsigned long, WSEGLPixelFormat, NativePixmapType);
 
-	WSEGLError (*pfnWSEGL_GetDrawableParameters)(WSEGLDrawableHandle, WSEGLDrawableParams *, WSEGLDrawableParams *);
+	WSEGLError (*pfnWSEGL_GetDrawableParameters)(WSEGLDrawableHandle, WSEGLDrawableParams *, WSEGLDrawableParams *, unsigned long);
 
+	WSEGLError (*pfnWSEGL_ConnectDrawable)(WSEGLDrawableHandle);
+
+	WSEGLError (*pfnWSEGL_DisconnectDrawable)(WSEGLDrawableHandle);
+
+	WSEGLError (*pfnWSEGL_FlagStartFrame)(void);
+
+
+#if defined (__QNXNTO__)
+	WSEGLError (*pfnWSEGL_WaitForDrawableRenderBuffer)(WSEGLDrawableHandle);
+#endif
 
 } WSEGL_FunctionTable;
 

@@ -449,7 +449,7 @@ static WSEGLError wseglCreateWindowDrawable
               nativeWindow->numFlipBuffers = WAYLANDWSEGL_MAX_FLIP_BUFFERS;
 
        /* Workaround for broken devices, seen in debugging */
-//       if (nativeWindow->numFlipBuffers < 2)
+       if (nativeWindow->numFlipBuffers < 2)
               nativeWindow->numFlipBuffers = 0;
     }
     else

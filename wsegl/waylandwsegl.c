@@ -265,7 +265,6 @@ int wayland_roundtrip(struct wl_egl_display *display)
     return ret;
 }
 
-
 /* Initialize a native display for use with WSEGL */
 static WSEGLError wseglInitializeDisplay
     (NativeDisplayType nativeDisplay, WSEGLDisplayHandle *display,
@@ -641,16 +640,15 @@ static WSEGLError wseglSwapDrawable
           (drawable->display->context, drawable->frontBufferPVRMEM, 1);                      
        assert (drawable->display->fd >= 0);
 
-
        struct omapfb_update_window update_window;
-         
+
        update_window.x = update_window.out_x = 0;
        update_window.y = update_window.out_y = 0;
        update_window.width = update_window.out_width = drawable->width;
        update_window.height = update_window.out_height = drawable->height;
        update_window.format = 0;
 
-       assert(ioctl(drawable->display->fd, OMAPFB_UPDATE_WINDOW, &update_window) == 0);
+       ioctl(drawable->display->fd, OMAPFB_UPDATE_WINDOW, &update_window);
     }
     
     drawable->currentBackBuffer   

@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=${prefix}
+libdir=@libdir@
+includedir=@includedir@
+
+Name: egl
+Description: OMAP EGL library
+Requires.private: 
+Version: @PACKAGE_VERSION@
+Libs: -L${libdir} -lEGL
+Libs.private: 
+Cflags: -I${includedir}

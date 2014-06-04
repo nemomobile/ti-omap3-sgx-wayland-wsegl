@@ -1,28 +1,4 @@
 
-wsegl.h:
-
-/******************************************************************************
- Name         : wsegl.h
- Copyright    :	Copyright (c) Imagination Technologies Limited.
-				This specification is protected by copyright laws and contains
-				material proprietary to Imagination Technologies Limited.
-				You may use and distribute this specification free of charge for implementing
-				the functionality therein, without altering or removing any trademark, copyright,
-				or other notice from the specification.
- Platform     : ANSI
-*****************************************************************************/
-
-Origin: 
-
-https://qt.gitorious.org/qt/qt/blobs/4.7/src/3rdparty/powervr/wsegl.h
-
-Comment:
-
-Newer version also exists in
-http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/gfxsdk/latest/index_FDS.html
-
-Release notes at http://processors.wiki.ti.com/index.php/RN_4_03_00_02
-
 linux/omapfb.h:
 
 /*
@@ -58,54 +34,7 @@ Comment:
 
 Similar method as used in xserver-xorg-video-fbdev (SGX variant)
 
-doc/reference/pvr2d.h:
 
-**********************************************************************
-*
-* Copyright(c) Imagination Technologies Ltd.
-*
-* The contents of this file are subject to the MIT license as set out below.
-*
-* Permission is hereby granted, free of charge, to any person obtaining a
-* copy
-* of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense,
-* and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-* 
-* The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-* MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-* CLAIM,
-* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
-* OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-* 
-* This License is also included in this distribution in the file called 
-* "COPYING".
-* 
-***************************************
-
-Origin:
-
-http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/gfxsdk/latest/index_FDS.html
-
-Release notes at http://processors.wiki.ti.com/index.php/RN_4_03_00_02
-
-Comment:
-
-Exact file not used in code, instead SGX driver's header file is used. Older
-version also exists in Qt tree at 
-https://qt.gitorious.org/qt/qt/blobs/4.7/src/3rdparty/powervr/pvr2d.h
-
-What is used from here especially is the PVR2DMemExport and PVR2DMemMap
-calls, used to share hardware buffers across processes.
 
 
 waylandwsegl.c/wayland-egl.c/wayland-egl-priv.h is described per feature added.

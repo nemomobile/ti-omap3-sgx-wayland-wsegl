@@ -91,7 +91,7 @@ wl_egl_display_create(struct wl_display *display)
 	egl_display->wseglDisplayConfigs[0].ulNativeRenderable = WSEGL_FALSE;
 	egl_display->wseglDisplayConfigs[0].ulFrameBufferLevel = 0;
 	egl_display->wseglDisplayConfigs[0].ulNativeVisualID = 0;
-	egl_display->wseglDisplayConfigs[0].hNativeVisual = 0;
+	egl_display->wseglDisplayConfigs[0].ulNativeVisualType = 0;
 	egl_display->wseglDisplayConfigs[0].eTransparentType = WSEGL_OPAQUE;
         egl_display->wseglDisplayConfigs[0].ulTransparentColor = 0;
         	
@@ -100,7 +100,7 @@ wl_egl_display_create(struct wl_display *display)
 	egl_display->wseglDisplayConfigs[1].ulNativeRenderable = WSEGL_FALSE;
 	egl_display->wseglDisplayConfigs[1].ulFrameBufferLevel = 0;
 	egl_display->wseglDisplayConfigs[1].ulNativeVisualID = 0;
-	egl_display->wseglDisplayConfigs[1].hNativeVisual = 0;
+	egl_display->wseglDisplayConfigs[1].ulNativeVisualType = 0;
 	egl_display->wseglDisplayConfigs[1].eTransparentType = WSEGL_OPAQUE;
         egl_display->wseglDisplayConfigs[1].ulTransparentColor = 0;
 
@@ -109,7 +109,7 @@ wl_egl_display_create(struct wl_display *display)
 	egl_display->wseglDisplayConfigs[2].ulNativeRenderable = 0;
 	egl_display->wseglDisplayConfigs[2].ulFrameBufferLevel = 0;
 	egl_display->wseglDisplayConfigs[2].ulNativeVisualID = 0;
-	egl_display->wseglDisplayConfigs[2].hNativeVisual = 0;
+	egl_display->wseglDisplayConfigs[2].ulNativeVisualType = 0;
 	egl_display->wseglDisplayConfigs[2].eTransparentType = 0;
         egl_display->wseglDisplayConfigs[2].ulTransparentColor = 0;
 
@@ -264,7 +264,6 @@ int wayland_roundtrip(struct wl_egl_display *display)
 
     return ret;
 }
-
 
 /* Initialize a native display for use with WSEGL */
 static WSEGLError wseglInitializeDisplay
@@ -450,7 +449,7 @@ static WSEGLError wseglCreateWindowDrawable
               nativeWindow->numFlipBuffers = WAYLANDWSEGL_MAX_FLIP_BUFFERS;
 
        /* Workaround for broken devices, seen in debugging */
-//       if (nativeWindow->numFlipBuffers < 2)
+       if (nativeWindow->numFlipBuffers < 2)
               nativeWindow->numFlipBuffers = 0;
     }
     else
@@ -641,16 +640,15 @@ static WSEGLError wseglSwapDrawable
           (drawable->display->context, drawable->frontBufferPVRMEM, 1);                      
        assert (drawable->display->fd >= 0);
 
-
        struct omapfb_update_window update_window;
-         
+
        update_window.x = update_window.out_x = 0;
        update_window.y = update_window.out_y = 0;
        update_window.width = update_window.out_width = drawable->width;
        update_window.height = update_window.out_height = drawable->height;
        update_window.format = 0;
 
-       assert(ioctl(drawable->display->fd, OMAPFB_UPDATE_WINDOW, &update_window) == 0);
+       ioctl(drawable->display->fd, OMAPFB_UPDATE_WINDOW, &update_window);
     }
     
     drawable->currentBackBuffer   
@@ -704,7 +702,7 @@ static int wseglGetBuffers(struct wl_egl_window *drawable, PVR2DMEMINFO **source
 /* Return the parameters of a drawable that are needed by the EGL layer */
 static WSEGLError wseglGetDrawableParameters
     (WSEGLDrawableHandle _drawable, WSEGLDrawableParams *sourceParams,
-     WSEGLDrawableParams *renderParams)
+     WSEGLDrawableParams *renderParams,unsigned long ulPlaneOffset)
      {
 /*
  * [22:26:17] <Stskeeps> note: you'll need this in future:
@@ -716,6 +714,11 @@ static WSEGLError wseglGetDrawableParameters
  */
     struct wl_egl_window *eglwindow = (struct wl_egl_window *) _drawable;
     PVR2DMEMINFO *source, *render;
+
+    WSEGL_UNREFERENCED_PARAMETER(ulPlaneOffset);
+
+    memset(renderParams, 0, sizeof(*renderParams));
+    memset(sourceParams, 0, sizeof(*sourceParams));
 
     if (eglwindow->header.type == WWSEGL_DRAWABLE_TYPE_PIXMAP)
     {
@@ -740,7 +743,7 @@ static WSEGLError wseglGetDrawableParameters
         sourceParams->ePixelFormat = pixmap->format;
         sourceParams->pvLinearAddress = pixmap->pvrmem->pBase;
         sourceParams->ui32HWAddress = pixmap->pvrmem->ui32DevAddr;
-        sourceParams->hPrivateData = pixmap->pvrmem->hPrivateData;
+        sourceParams->hMemInfo = pixmap->pvrmem->hPrivateData;
 
         renderParams->ui32Width = pixmap->width;
         renderParams->ui32Height = pixmap->height;
@@ -748,7 +751,7 @@ static WSEGLError wseglGetDrawableParameters
         renderParams->ePixelFormat = pixmap->format;
         renderParams->pvLinearAddress = pixmap->pvrmem->pBase;
         renderParams->ui32HWAddress = pixmap->pvrmem->ui32DevAddr;
-        renderParams->hPrivateData = pixmap->pvrmem->hPrivateData;
+        renderParams->hMemInfo = pixmap->pvrmem->hPrivateData;
 
         return WSEGL_SUCCESS;
     }
@@ -764,7 +767,7 @@ static WSEGLError wseglGetDrawableParameters
     sourceParams->ePixelFormat = eglwindow->format;   
     sourceParams->pvLinearAddress = source->pBase;
     sourceParams->ui32HWAddress = source->ui32DevAddr;
-    sourceParams->hPrivateData = source->hPrivateData;
+    sourceParams->hMemInfo = source->hPrivateData;
 
     renderParams->ui32Width = eglwindow->width;
     renderParams->ui32Height = eglwindow->height;
@@ -772,10 +775,31 @@ static WSEGLError wseglGetDrawableParameters
     renderParams->ePixelFormat = eglwindow->format;
     renderParams->pvLinearAddress = render->pBase;
     renderParams->ui32HWAddress = render->ui32DevAddr;
-    renderParams->hPrivateData = render->hPrivateData;
+    renderParams->hMemInfo = render->hPrivateData;
 
     return WSEGL_SUCCESS;
 
+}
+
+
+/* Function stub for ConnectDrawable() */
+static WSEGLError wseglConnectDrawable(WSEGLDrawableHandle hDrawable)
+{
+    WSEGL_UNREFERENCED_PARAMETER(hDrawable);
+    return WSEGL_SUCCESS;
+}
+
+/* Function stub for DisconnectDrawable() */
+static WSEGLError wseglDisconnectDrawable(WSEGLDrawableHandle hDrawable)
+{
+    WSEGL_UNREFERENCED_PARAMETER(hDrawable);
+    return WSEGL_SUCCESS;
+}
+
+/* Function stub for FlagStartFrame() */
+static WSEGLError wseglFlagStartFrame(void)
+{
+    return WSEGL_SUCCESS;
 }
 
 static WSEGL_FunctionTable const wseglFunctions = {
@@ -791,7 +815,10 @@ static WSEGL_FunctionTable const wseglFunctions = {
     wseglWaitNative,
     wseglCopyFromDrawable,
     wseglCopyFromPBuffer,
-    wseglGetDrawableParameters
+    wseglGetDrawableParameters,
+    wseglConnectDrawable,
+    wseglDisconnectDrawable,
+    wseglFlagStartFrame
 };
 
 /* Return the table of WSEGL functions to the EGL implementation */

@@ -51,8 +51,8 @@ typedef struct wl_display* NativeDisplayType;
 typedef struct wl_egl_pixmap* NativePixmapType;
 typedef struct wl_egl_window* NativeWindowType;
 
+#include <wsegl.h>
 #include "wayland-sgx-server-protocol.h"
-#include "wsegl.h"
 
 #define WAYLANDWSEGL_MAX_BACK_BUFFERS     2
 #define WAYLANDWSEGL_MAX_FLIP_BUFFERS 	  2

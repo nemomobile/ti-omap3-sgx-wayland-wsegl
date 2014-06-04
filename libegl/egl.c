@@ -20,9 +20,13 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+/* TI headers don't define these */
 #ifndef EGL_WAYLAND_BUFFER_WL
-/* TI headers don't define this */
 #define EGL_WAYLAND_BUFFER_WL    0x31D5 /* eglCreateImageKHR target */
+#endif
+
+#ifndef EGL_WAYLAND_PLANE_WL
+#define EGL_WAYLAND_PLANE_WL     0x31D6 /* eglCreateImageKHR attribute */
 #endif
 
 #include <dlfcn.h>
@@ -368,10 +372,49 @@ static EGLImageKHR _my_eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum
 	}
 
 	if (target == EGL_WAYLAND_BUFFER_WL) {
-		EGLImageKHR ret = (*_eglCreateImageKHR)(dpy, EGL_NO_CONTEXT, EGL_NATIVE_PIXMAP_KHR, buffer, attrib_list);
+		/* TI implementation does not know EGL_WAYLAND_PLANE_WL so remove it for now.
+		 * In my test environment there was only plane 0 required (EGL_TEXTURE_RGB/EGL_TEXTURE_RGBA)
+		 * so removing plane information is not mandatory */
+		EGLint *attrib_source, *attrib_dest;
+		int attribs_count = 0;
+		int found_EGL_WAYLAND_PLANE_WL = 0;
+
+		/* first check number of attributes */
+		for(attrib_source = attrib_list; attrib_source != 0 && *attrib_source != EGL_NONE; ++attrib_source)
+		{
+			++attribs_count;
+			if (*attrib_source == EGL_WAYLAND_PLANE_WL)
+			{
+				found_EGL_WAYLAND_PLANE_WL = 1;
+				wsegl_debug("eglCreateImageKHR: removing attribute EGL_WAYLAND_PLANE_WL(%d)", *(attrib_source+1));
+			}
+		}
+		/* rebuild without EGL_WAYLAND_PLANE_WL */
+		if (found_EGL_WAYLAND_PLANE_WL && attribs_count >= 2)
+			attribs_count -= 2;
+		EGLint *attrib_list_new = malloc(sizeof(EGLint *) * (attribs_count+1)); /* terminate with EGL_NONE */
+		assert(attrib_list_new != NULL);
+		for(attrib_source = attrib_list, attrib_dest = attrib_list_new;
+			attrib_source != 0 && *attrib_source != EGL_NONE;
+			++attrib_source)
+		{
+			/* ignore EGL_WAYLAND_PLANE_WL + plane */
+			if (*attrib_source == EGL_WAYLAND_PLANE_WL)
+			{
+				++attrib_source;
+			}
+			else
+			{
+				*attrib_dest = *attrib_source;
+				++attrib_dest;
+			}
+		}
+		*attrib_dest = EGL_NONE;
+
+		EGLImageKHR ret = (*_eglCreateImageKHR)(dpy, EGL_NO_CONTEXT, EGL_NATIVE_PIXMAP_KHR, buffer, attrib_list_new);
+		free(attrib_list_new);
 		return ret;
 	}
-
 
 	EGLImageKHR ret = (*_eglCreateImageKHR)(dpy, ctx, target, buffer, attrib_list);
 	return ret;
